@@ -1,12 +1,13 @@
-
 import { useState, useEffect } from "react";
 import { Send, User, FolderOpen, BookOpen, Palette, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const [chatMessage, setChatMessage] = useState("");
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -27,10 +28,11 @@ const Index = () => {
 
   const handleChatSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (chatMessage.trim()) {
-      console.log("Chat message:", chatMessage);
-      setChatMessage("");
-    }
+    navigate("/chat");
+  };
+
+  const handleInputClick = () => {
+    navigate("/chat");
   };
 
   return (
@@ -120,8 +122,10 @@ const Index = () => {
               <Input
                 value={chatMessage}
                 onChange={(e) => setChatMessage(e.target.value)}
+                onClick={handleInputClick}
                 placeholder="Ask me anything..."
-                className="w-full h-14 pl-6 pr-4 rounded-full border-0 bg-white/60 backdrop-blur-xl shadow-lg placeholder:text-gray-500 text-gray-800 focus:ring-2 focus:ring-blue-400/50"
+                className="w-full h-14 pl-6 pr-4 rounded-full border-0 bg-white/60 backdrop-blur-xl shadow-lg placeholder:text-gray-500 text-gray-800 focus:ring-2 focus:ring-blue-400/50 cursor-pointer"
+                readOnly
               />
             </div>
             <Button

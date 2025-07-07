@@ -1,6 +1,6 @@
 
 import { useState, useRef, useEffect } from "react";
-import { Send, ArrowLeft, User, Bot } from "lucide-react";
+import { Send, ArrowLeft, User, Bot, FolderOpen, BookOpen, Palette, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
@@ -25,6 +25,14 @@ const Chatbot = () => {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  const navSections = [
+    { name: "Me", icon: User, color: "bg-emerald-400/30" },
+    { name: "Projects", icon: FolderOpen, color: "bg-purple-400/30" },
+    { name: "Skills", icon: BookOpen, color: "bg-blue-400/30" },
+    { name: "Fun", icon: Palette, color: "bg-pink-400/30" },
+    { name: "Contact", icon: Phone, color: "bg-yellow-400/30" }
+  ];
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -142,6 +150,25 @@ const Chatbot = () => {
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Floating Navigation Buttons */}
+      <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-20">
+        <div className="flex gap-2">
+          {navSections.map((section, index) => {
+            const IconComponent = section.icon;
+            return (
+              <Button
+                key={section.name}
+                variant="ghost"
+                className={`w-10 h-10 rounded-full backdrop-blur-xl shadow-lg border-0 transition-all duration-300 hover:scale-105 ${section.color} bg-white/40 hover:bg-white/60 p-0`}
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
+                <IconComponent className="w-4 h-4 text-gray-700" />
+              </Button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Input */}
       <div className="p-6 bg-white/80 backdrop-blur-xl border-t border-gray-200/50">
         <form onSubmit={handleSendMessage} className="flex gap-3 items-center max-w-4xl mx-auto">
@@ -149,7 +176,7 @@ const Chatbot = () => {
             <Input
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Type your message..."
+              placeholder="Ask me anything..."
               className="w-full h-12 pl-4 pr-4 rounded-full border-gray-200 bg-white focus:ring-2 focus:ring-blue-400/50"
               disabled={isTyping}
             />

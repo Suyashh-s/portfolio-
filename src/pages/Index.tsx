@@ -1,9 +1,11 @@
 
 import { useState, useEffect } from "react";
-import { User, FolderOpen, BookOpen, Palette, Phone } from "lucide-react";
+import { Send, User, FolderOpen, BookOpen, Palette, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const Index = () => {
+  const [chatMessage, setChatMessage] = useState("");
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -22,6 +24,14 @@ const Index = () => {
     { name: "Fun", icon: Palette, color: "bg-pink-400/30" },
     { name: "Contact", icon: Phone, color: "bg-yellow-400/30" }
   ];
+
+  const handleChatSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (chatMessage.trim()) {
+      console.log("Chat message:", chatMessage);
+      setChatMessage("");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 relative overflow-hidden">
@@ -79,7 +89,7 @@ const Index = () => {
       </div>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 p-6 z-20">
+      <div className="fixed bottom-20 left-0 right-0 p-6 z-20">
         <div className="max-w-2xl mx-auto">
           <div className="grid grid-cols-5 gap-3">
             {navSections.map((section, index) => {
@@ -99,6 +109,28 @@ const Index = () => {
               );
             })}
           </div>
+        </div>
+      </div>
+
+      {/* Fixed Chat Input at Bottom */}
+      <div className="fixed bottom-0 left-0 right-0 p-6 z-20">
+        <div className="max-w-md mx-auto">
+          <form onSubmit={handleChatSubmit} className="flex gap-3 items-center">
+            <div className="flex-1 relative">
+              <Input
+                value={chatMessage}
+                onChange={(e) => setChatMessage(e.target.value)}
+                placeholder="Ask me anything..."
+                className="w-full h-14 pl-6 pr-4 rounded-full border-0 bg-white/60 backdrop-blur-xl shadow-lg placeholder:text-gray-500 text-gray-800 focus:ring-2 focus:ring-blue-400/50"
+              />
+            </div>
+            <Button
+              type="submit"
+              className="h-14 w-14 rounded-full bg-blue-500 hover:bg-blue-600 flex items-center justify-center p-0 shadow-lg"
+            >
+              <Send className="w-5 h-5 text-white" />
+            </Button>
+          </form>
         </div>
       </div>
     </div>

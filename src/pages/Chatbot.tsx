@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Send, ArrowLeft, User, Bot, FolderOpen, BookOpen, Palette, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -41,6 +40,30 @@ const Chatbot = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const handleNavButtonClick = (sectionName: string) => {
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      text: "hii",
+      isUser: true,
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setIsTyping(true);
+
+    // Simulate AI response
+    setTimeout(() => {
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: `Hello! You clicked on ${sectionName}. I'd be happy to tell you more about Suyash's ${sectionName.toLowerCase()}!`,
+        isUser: false,
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, botMessage]);
+      setIsTyping(false);
+    }, 1500);
+  };
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,18 +174,23 @@ const Chatbot = () => {
       </div>
 
       {/* Floating Navigation Buttons */}
-      <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-20">
-        <div className="flex gap-2">
+      <div className="fixed bottom-24 left-1/2 transform -translate-x-1/2 z-20">
+        <div className="flex gap-4 px-4">
           {navSections.map((section, index) => {
             const IconComponent = section.icon;
             return (
               <Button
                 key={section.name}
                 variant="ghost"
-                className={`w-10 h-10 rounded-full backdrop-blur-xl shadow-lg border-0 transition-all duration-300 hover:scale-105 ${section.color} bg-white/40 hover:bg-white/60 p-0`}
-                style={{ animationDelay: `${index * 50}ms` }}
+                onClick={() => handleNavButtonClick(section.name)}
+                className={`flex flex-col items-center gap-1 w-16 h-16 rounded-2xl backdrop-blur-xl shadow-lg border-0 transition-all duration-300 hover:scale-110 hover:-translate-y-1 ${section.color} bg-white/50 hover:bg-white/70 p-2 animate-float`}
+                style={{ 
+                  animationDelay: `${index * 200}ms`,
+                  animationDuration: `${3 + index * 0.5}s`
+                }}
               >
-                <IconComponent className="w-4 h-4 text-gray-700" />
+                <IconComponent className="w-5 h-5 text-gray-700" />
+                <span className="text-xs font-medium text-gray-700">{section.name}</span>
               </Button>
             );
           })}

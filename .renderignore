@@ -1,0 +1,9 @@
+node_modules
+*.log
+dist
+.vscode
+.DS_Store
+.env
+*.local
+npm-debug.log
+bun.lockb 

@@ -154,7 +154,7 @@ function ResumeModal({ open, onClose }: { open: boolean; onClose: () => void }) 
         ) : (
           <div className="mb-4 w-full flex justify-center">
             <iframe
-              src="https://pub-c31ada0ae90b4637b66c95c2e1fef0f6.r2.dev/about.jpg"
+              src={RESUME_URL}
               title="Resume Preview"
               className="w-full h-96 rounded-lg border border-gray-200 shadow"
               style={{ minHeight: 400, height: 500 }}

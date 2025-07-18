@@ -211,7 +211,8 @@ const Chatbot = () => {
     setIsTyping(true);
 
     try {
-      const res = await fetch("https://your-backend.onrender.com/api/query", {
+      const API_URL = import.meta.env.VITE_API_URL || "https://portfolio-d4fz.onrender.com/api/query";
+      const res = await fetch(API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

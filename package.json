@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-      "start": "node server.js",
+    "postbuild": "copy public\\_routes.json dist\\_routes.json",
+    "start": "node server.js",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview"

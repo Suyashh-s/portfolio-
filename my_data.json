@@ -1,0 +1,119 @@
+[
+  {
+    "id": "bio",
+    "text": "Hi! I'm Suyash — a passionate developer and Information Technology student at Datta Meghe College of Engineering. I love building impactful, intelligent solutions that combine creativity with technology. I'm always exploring new tools, pushing my limits, and learning from every project and collaboration.\n\nLet’s connect, collaborate, and build something meaningful together!\n\nLinkedIn - (https://www.linkedin.com/in/suyashhh-s) | [GitHub - (https://github.com/Suyashh-s) | [Contact Me] - press the contact button below | [Resume] -  press the resume button below "
+  , "example_questions": [
+    "Who are you?",
+    "Can you introduce yourself?",
+    "Tell me about yourself.",
+    "What do you do?",
+    "What should I know about you?",
+    "How would you describe yourself?",
+    "What is your background?",
+    "What makes you unique?",
+    "How did you get started?",
+    "Can you share a short bio?"
+  ]
+  },
+  {
+    "id": "skills",
+    "text": "My technical skills span across multiple domains:\n\n- Frontend: JavaScript, TypeScript, React, Next.js, Tailwind CSS, and crafting modern UI/UX designs using Figma.\n- Backend: Node.js, Express.js, MongoDB, RESTful APIs, and building scalable server-side architectures.\n- AI & Machine Learning: Python, TensorFlow, PyTorch, prompt engineering, and integrating large language models (LLMs).\n- Blockchain & Web3: Solidity, smart contract development, and building decentralized applications (dApps).\n- Mobile Development: React Native and Flutter for cross-platform mobile app development.\n- Design & 3D: Figma for designing intuitive interfaces and Blender for 3D modeling and creative visual assets.\n\nAnd if you're wondering about my superpower: I'm a ridiculously fast learner — I can pick up new technologies quicker than you can finish your coffee!"
+  ,"example_questions": [
+    "What are your technical skills?",
+    "What technologies do you work with?",
+    "Tell me about your skill set.",
+    "What programming languages do you know?",
+    "Which frameworks are you experienced with?",
+    "What is your strongest skill?",
+    "What tools do you use?",
+    "What tech stacks do you prefer?",
+    "Describe your technical expertise.",
+    "What are you good at?"
+  ]
+  },
+  {
+    "id": "projects",
+    "text": "I have created and worked on a variety of projects using technologies like Flutter, Dart, the MERN Stack, AI/ML, HTML, CSS, JavaScript, Bootstrap, Node.js (Express), and MongoDB. I also enjoy working on IoT-based innovations that blend hardware with software. To explore my work in detail, [Projects] -  press the projects button below !"
+  ,"example_questions": [
+    "What projects have you worked on?",
+    "Can you show me your projects?",
+    "Tell me about your recent work.",
+    "What have you built so far?",
+    "Can I see examples of your work?",
+    "What is your favorite project?",
+    "What tech stacks did you use in your projects?",
+    "What kind of projects do you enjoy building?",
+    "Can you describe your project experience?",
+    "Where can I view your projects?"
+  ]
+  },
+  {
+    "id": "fun",
+    "text": "Beyond coding, I enjoy trekking, hiking, and going on long rides to reconnect with nature and find fresh inspiration. I love reading novels and books that expand my perspective, as well as binge-watching series and movies to relax and recharge. I also play the piano, explore new places whenever I can, and truly enjoy learning new skills from others. In my free time, you'll also find me trying out new foods, spending quality time with friends and family, or simply enjoying a good cup of coffee while brainstorming new ideas."
+  ,"example_questions": [
+    "What are your hobbies?",
+    "What do you do for fun?",
+    "What are your interests outside of work?",
+    "How do you spend your free time?",
+    "What do you enjoy doing when not coding?",
+    "Do you have any creative hobbies?",
+    "What activities do you love?",
+    "What makes you happy?",
+    "How do you relax?",
+    "What are your passions beyond tech?"]
+  },
+  {
+    "id": "goals",
+    "text": "My goal is to create apps and software that help society and empower the youth to grow and reach their potential. I’m passionate about using technology as a force for good and building solutions that truly make an impact. In the future, I aim to build my own startup and also collaborate with new, passionate founders who share the same vision of creating meaningful change."
+  ,"example_questions": [
+      "What are your goals?",
+    "Where do you see yourself in the future?",
+    "What are your future plans?",
+    "What do you want to achieve next?",
+    "Tell me about your vision.",
+    "What are your long-term ambitions?",
+    "What motivates you to keep going?",
+    "Do you have a dream project or goal?",
+    "What inspires you to grow?",
+    "What is your mission?"
+  ]
+  },
+  {
+    "id": "achievements",
+  "text": "Some of my key achievements and hackathon milestones include:\n\n🏆 Winner — Smart India Hackathon 2024 (National Level), Government of India.\n\n🥈 Finalist — InspirioBiz 5.0 Case Study Competition 2025 (National Level), VESIM (Vivekanand Education Society's Institute of Management Studies). Our team 'Shiledar' secured a finalist position as one of the first undergraduate engineering teams to break into this business-focused competition.\n\n🎯 Grand Finalist — IDE Bootcamp (Edition 2, Phase 2), 2025 (National Level), Ministry of Education & Wadhwani Foundation.\n\n💡 Top 30 — MujHacks 2.0, 2024 (University Level), Manipal University Jaipur.\n\n🤖 Finalist — LenDenClub's AI Hackathon — The Matrix Protocol, 2025.\n\n🚀 Grand Finalist — Airavat 2.0 - An AI Hackathon, 2025 (National Level), IEEE CS, Sardar Patel Institute of Technology, Mumbai.\n\n...and many more! I continue to actively participate in national and international hackathons, constantly pushing my skills, learning from amazing teams, and building solutions that make an impact.",
+  "images": [
+    "/images/photo1.jpg",
+    "/images/photo2.jpg",
+    "/images/photo3.jpg",
+    "/images/photo4.jpg"
+  ]
+  ,"example_questions": [
+    "What are your achievements?",
+    "Tell me about your awards.",
+    "Which hackathons did you win?",
+    "What have you accomplished recently?",
+    "What milestones have you achieved?",
+    "What competitions have you participated in?",
+    "What are your biggest wins?",
+    "What are you most proud of?",
+    "Can you list your accomplishments?",
+    "What recognitions have you received?"
+  ]
+  },
+  {
+    "id": "work_experience",
+    "text": "I have collaborated with multiple startups and teams as a freelancer, delivering impactful computer vision solutions. Some of my key contributions include developing safety systems such as face detection-based attendance and verification, vehicle database systems with number plate recognition, and violence detection frameworks for enhanced security monitoring.\n\nIn addition to these, I’ve worked on custom AI-powered tools tailored to specific business needs, helping early-stage companies bring their ideas to life with advanced technology.\n\nCurrently, I’m focused on building my own startup, where I aim to combine my experience in AI, full-stack development, and design to create products that make a real difference. I’m passionate about collaborating with other ambitious founders and creating tech solutions that positively impact society.\n\nIf you'd like to see a glimpse of the projects I've worked on, [ press the projects button below ]!"
+  ,"example_questions": [
+    "What is your work experience?",
+    "Have you worked with startups?",
+    "Tell me about your professional background.",
+    "What kind of projects have you built for clients?",
+    "What freelance work have you done?",
+    "What industries have you worked in?",
+    "Can you describe your past jobs?",
+    "What did you do before this?",
+    "Do you have leadership experience?",
+    "What projects did you work on while freelancing?"
+  ]
+  }
+]

@@ -211,7 +211,7 @@ const Chatbot = () => {
     setIsTyping(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/query", {
+      const res = await fetch("https://your-backend.onrender.com/api/query", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

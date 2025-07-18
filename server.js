@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 import { QdrantClient } from "@qdrant/js-client-rest";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { pipeline } from "@xenova/transformers";
@@ -25,16 +27,15 @@ let embedder;
   console.log("✅ Embedding model loaded!");
 })();
 
+// ✅ API route
 app.post("/api/query", async (req, res) => {
   const { query } = req.body;
   if (!query) return res.status(400).json({ error: "No query provided" });
 
   try {
-    // Create embedding vector
     const embeddings = await embedder(query, { pooling: "mean", normalize: true });
     const vector = Array.from(embeddings.data);
 
-    // ✅ Qdrant search
     const results = await qdrant.search("portfolio", {
       vector,
       limit: 1,
@@ -43,21 +44,17 @@ app.post("/api/query", async (req, res) => {
 
     let qdrantText = "I couldn’t find any exact match in my data.";
     let images = [];
+
     if (results.length > 0 && results[0].payload && results[0].payload.text) {
       qdrantText = results[0].payload.text;
-      // Only return images if query includes certain keywords
       const lowerQuery = query.toLowerCase();
       if (/(achievement|hackathon|about me|tell me about yourself)/.test(lowerQuery)) {
         images = results[0].payload.images || [];
-      } else {
-        images = [];
       }
     }
 
-    // ✅ Gemini model
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
-    // ✅ Prompt
     const prompt = `
 You are Suyash Sawant, and you're answering in first person but don't write "As Suyash Sawant" unnecessarily.
 Write clearly, professionally, and in a structured, elegant style.
@@ -72,7 +69,6 @@ Only provide a direct answer — do not mention that you are an assistant or AI.
     const result = await model.generateContent(prompt);
     let geminiAnswer = result.response.text();
 
-    // ✅ Clean up Gemini code block artifacts
     let cleanedAnswer = geminiAnswer.trim();
     if (cleanedAnswer.startsWith("```html")) {
       cleanedAnswer = cleanedAnswer.slice(6).trim();
@@ -87,8 +83,6 @@ Only provide a direct answer — do not mention that you are an assistant or AI.
     res.json({ answer: cleanedAnswer, images });
   } catch (error) {
     console.error("Error:", error);
-
-    // ✅ Friendly fallback message
     res.status(200).json({
       answer: `The server is currently overloaded. Please try again in 5–10 seconds.
 
@@ -98,6 +92,18 @@ Meanwhile, feel free to explore my **projects**, **skills**, or **achievements**
   }
 });
 
-app.listen(5000, () => {
-  console.log("✅ Server running on http://localhost:5000");
+// ✅ Serve Vite frontend from dist in production
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+app.use(express.static(path.join(__dirname, "dist")));
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
+});
+
+// ✅ Start server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`✅ Server running on http://localhost:${PORT}`);
 });

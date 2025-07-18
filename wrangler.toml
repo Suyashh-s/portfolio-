@@ -1,0 +1,7 @@
+name = "portfolio"
+type = "javascript"
+compatibility_date = "2025-07-18"
+
+[build]
+command = "npm install && npm run build"
+upload = { format = "directory", dir = "./dist" } 

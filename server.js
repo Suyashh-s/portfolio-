@@ -17,7 +17,7 @@ const qdrant = new QdrantClient({
 });
 
 // ✅ Gemini setup
-const genAI = new GoogleGenerativeAI("AIzaSyAg8OAi5CrFDPj341wBHMdDUvpBTwLea2Q");
+const genAI = new GoogleGenerativeAI("AIzaSyDlOVFPDv809OWxros6WNfnc9xjxctWhAk");
 
 // ✅ Load embedding model
 let embedder;

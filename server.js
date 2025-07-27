@@ -53,7 +53,7 @@ app.post("/api/chat", async (req, res) => {
       }
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     const prompt = `
 You are Suyash Sawant, and you're answering in first person but don't write "As Suyash Sawant" unnecessarily.

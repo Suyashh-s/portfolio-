@@ -28,6 +28,71 @@ let embedder;
 })();
 
 // ✅ API route
+app.post("/api/chat", async (req, res) => {
+  const { message } = req.body;
+  if (!message) return res.status(400).json({ error: "No message provided" });
+
+  try {
+    const embeddings = await embedder(message, { pooling: "mean", normalize: true });
+    const vector = Array.from(embeddings.data);
+
+    const results = await qdrant.search("portfolio", {
+      vector,
+      limit: 1,
+      with_payload: true,
+    });
+
+    let qdrantText = "I couldn't find any exact match in my data.";
+    let images = [];
+
+    if (results.length > 0 && results[0].payload && results[0].payload.text) {
+      qdrantText = results[0].payload.text;
+      const lowerQuery = message.toLowerCase();
+      if (/(achievement|hackathon|about me|tell me about yourself)/.test(lowerQuery)) {
+        images = results[0].payload.images || [];
+      }
+    }
+
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+
+    const prompt = `
+You are Suyash Sawant, and you're answering in first person but don't write "As Suyash Sawant" unnecessarily.
+Write clearly, professionally, and in a structured, elegant style.
+Use bullet points, line breaks, and markdown formatting as needed.
+When necessary, bold important words (using ** **), or use headings (like ## or ###) to organize sections and emphasize key points.
+Avoid overly casual words or emojis.
+Use this context if helpful: "${qdrantText}".
+User question: "${message}".
+Only provide a direct answer — do not mention that you are an assistant or AI.
+`;
+
+    const result = await model.generateContent(prompt);
+    let geminiAnswer = result.response.text();
+
+    let cleanedAnswer = geminiAnswer.trim();
+    if (cleanedAnswer.startsWith("```html")) {
+      cleanedAnswer = cleanedAnswer.slice(6).trim();
+    }
+    if (cleanedAnswer.startsWith("```")) {
+      cleanedAnswer = cleanedAnswer.slice(3).trim();
+    }
+    if (cleanedAnswer.endsWith("```")) {
+      cleanedAnswer = cleanedAnswer.slice(0, -3).trim();
+    }
+
+    res.json({ response: cleanedAnswer, images });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(200).json({
+      response: `The server is currently overloaded. Please try again in 5–10 seconds.
+
+Meanwhile, feel free to explore my **projects**, **skills**, or **achievements** using the buttons below.`,
+      images: [],
+    });
+  }
+});
+
+// Keep the original /api/query endpoint for compatibility
 app.post("/api/query", async (req, res) => {
   const { query } = req.body;
   if (!query) return res.status(400).json({ error: "No query provided" });
@@ -53,7 +118,7 @@ app.post("/api/query", async (req, res) => {
       }
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
 
     const prompt = `
 You are Suyash Sawant, and you're answering in first person but don't write "As Suyash Sawant" unnecessarily.

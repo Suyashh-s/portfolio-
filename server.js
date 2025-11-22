@@ -20,8 +20,12 @@ const qdrant = new QdrantClient({
 });
 
 // ✅ xAI Grok setup
+const XAI_API_KEY = process.env.XAI_API_KEY;
+if (!XAI_API_KEY) {
+  console.warn("⚠️  XAI_API_KEY not found in environment variables");
+}
 const xai = new OpenAI({
-  apiKey: process.env.XAI_API_KEY || "your-xai-api-key",
+  apiKey: XAI_API_KEY,
   baseURL: "https://api.x.ai/v1",
 });
 

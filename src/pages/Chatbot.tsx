@@ -211,20 +211,20 @@ const Chatbot = () => {
     setIsTyping(true);
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || "https://portfolio-d4fz.onrender.com/api/query";
+      const API_URL = import.meta.env.VITE_API_URL || "https://portfolio-d4fz.onrender.com/api/chat";
       const res = await fetch(API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ query: userMessage.text }),
+        body: JSON.stringify({ message: userMessage.text }),
       });
 
       const data = await res.json();
 
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: data.answer || "Sorry, I couldn't generate a response.",
+        text: data.response || data.answer || "Sorry, I couldn't generate a response.",
         isUser: false,
         timestamp: new Date(),
         images: data.images || [],

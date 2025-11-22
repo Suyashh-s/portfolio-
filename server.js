@@ -3,8 +3,11 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import { QdrantClient } from "@qdrant/js-client-rest";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 import { pipeline } from "@xenova/transformers";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
@@ -16,8 +19,11 @@ const qdrant = new QdrantClient({
   apiKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.N_HbVOoGaSz-96bOrWMvORXGOA1JyiPkoXuau9eSiqk",
 });
 
-// ✅ Gemini setup
-const genAI = new GoogleGenerativeAI("AIzaSyDlOVFPDv809OWxros6WNfnc9xjxctWhAk");
+// ✅ xAI Grok setup
+const xai = new OpenAI({
+  apiKey: process.env.XAI_API_KEY || "your-xai-api-key",
+  baseURL: "https://api.x.ai/v1",
+});
 
 // ✅ Load embedding model
 let embedder;
@@ -53,21 +59,21 @@ app.post("/api/chat", async (req, res) => {
       }
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const completion = await xai.chat.completions.create({
+      model: "grok-2-1212",
+      messages: [
+        {
+          role: "system",
+          content: "You are Suyash Sawant, and you're answering in first person but don't write 'As Suyash Sawant' unnecessarily. Write clearly, professionally, and in a structured, elegant style. Use bullet points, line breaks, and markdown formatting as needed. When necessary, bold important words (using ** **), or use headings (like ## or ###) to organize sections and emphasize key points. Avoid overly casual words or emojis. Only provide a direct answer — do not mention that you are an assistant or AI."
+        },
+        {
+          role: "user",
+          content: `Use this context if helpful: "${qdrantText}". User question: "${message}"`
+        }
+      ],
+    });
 
-    const prompt = `
-You are Suyash Sawant, and you're answering in first person but don't write "As Suyash Sawant" unnecessarily.
-Write clearly, professionally, and in a structured, elegant style.
-Use bullet points, line breaks, and markdown formatting as needed.
-When necessary, bold important words (using ** **), or use headings (like ## or ###) to organize sections and emphasize key points.
-Avoid overly casual words or emojis.
-Use this context if helpful: "${qdrantText}".
-User question: "${message}".
-Only provide a direct answer — do not mention that you are an assistant or AI.
-`;
-
-    const result = await model.generateContent(prompt);
-    let geminiAnswer = result.response.text();
+    let geminiAnswer = completion.choices[0].message.content;
 
     let cleanedAnswer = geminiAnswer.trim();
     if (cleanedAnswer.startsWith("```html")) {
@@ -118,21 +124,21 @@ app.post("/api/query", async (req, res) => {
       }
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+    const completion = await xai.chat.completions.create({
+      model: "grok-2-1212",
+      messages: [
+        {
+          role: "system",
+          content: "You are Suyash Sawant, and you're answering in first person but don't write 'As Suyash Sawant' unnecessarily. Write clearly, professionally, and in a structured, elegant style. Use bullet points, line breaks, and markdown formatting as needed. When necessary, bold important words (using ** **), or use headings (like ## or ###) to organize sections and emphasize key points. Avoid overly casual words or emojis. Only provide a direct answer — do not mention that you are an assistant or AI."
+        },
+        {
+          role: "user",
+          content: `Use this context if helpful: "${qdrantText}". User question: "${query}"`
+        }
+      ],
+    });
 
-    const prompt = `
-You are Suyash Sawant, and you're answering in first person but don't write "As Suyash Sawant" unnecessarily.
-Write clearly, professionally, and in a structured, elegant style.
-Use bullet points, line breaks, and markdown formatting as needed.
-When necessary, bold important words (using ** **), or use headings (like ## or ###) to organize sections and emphasize key points.
-Avoid overly casual words or emojis.
-Use this context if helpful: "${qdrantText}".
-User question: "${query}".
-Only provide a direct answer — do not mention that you are an assistant or AI.
-`;
-
-    const result = await model.generateContent(prompt);
-    let geminiAnswer = result.response.text();
+    let geminiAnswer = completion.choices[0].message.content;
 
     let cleanedAnswer = geminiAnswer.trim();
     if (cleanedAnswer.startsWith("```html")) {

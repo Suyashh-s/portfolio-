@@ -20,14 +20,14 @@ const qdrant = new QdrantClient({
   apiKey: QDRANT_API_KEY,
 });
 
-// ✅ xAI Grok setup
-const XAI_API_KEY = process.env.XAI_API_KEY;
-if (!XAI_API_KEY) {
-  console.warn("⚠️  XAI_API_KEY not found in environment variables");
+// ✅ Groq setup
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+if (!GROQ_API_KEY) {
+  console.warn("⚠️  GROQ_API_KEY not found in environment variables");
 }
-const xai = new OpenAI({
-  apiKey: XAI_API_KEY,
-  baseURL: "https://api.x.ai/v1",
+const groq = new OpenAI({
+  apiKey: GROQ_API_KEY,
+  baseURL: "https://api.groq.com/openai/v1",
 });
 
 // ✅ Load embedding model
@@ -64,8 +64,8 @@ app.post("/api/chat", async (req, res) => {
       }
     }
 
-    const completion = await xai.chat.completions.create({
-      model: "grok-2-1212",
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
       messages: [
         {
           role: "system",
@@ -129,8 +129,8 @@ app.post("/api/query", async (req, res) => {
       }
     }
 
-    const completion = await xai.chat.completions.create({
-      model: "grok-2-1212",
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
       messages: [
         {
           role: "system",

@@ -14,9 +14,10 @@ app.use(cors());
 app.use(express.json());
 
 // ✅ Qdrant setup
+const QDRANT_API_KEY = process.env.QDRANT_API_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.MrrpTeWT0if2DFKgpnU5XA2N6ZMIGf3BcvthRfaCBD8";
 const qdrant = new QdrantClient({
-  url: "https://a05e110a-6fff-4675-856c-f997cf369393.us-east4-0.gcp.cloud.qdrant.io",
-  apiKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.N_HbVOoGaSz-96bOrWMvORXGOA1JyiPkoXuau9eSiqk",
+  url: "https://b266344a-9319-41de-92c5-e3042ae0735c.eu-west-2-0.aws.cloud.qdrant.io:6333",
+  apiKey: QDRANT_API_KEY,
 });
 
 // ✅ xAI Grok setup

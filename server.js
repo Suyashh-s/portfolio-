@@ -20,14 +20,13 @@ const qdrant = new QdrantClient({
   apiKey: QDRANT_API_KEY,
 });
 
-// ✅ Groq setup
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
-if (!GROQ_API_KEY) {
-  console.warn("⚠️  GROQ_API_KEY not found in environment variables");
+// ✅ OpenAI setup
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+if (!OPENAI_API_KEY) {
+  console.warn("⚠️  OPENAI_API_KEY not found in environment variables");
 }
-const groq = new OpenAI({
-  apiKey: GROQ_API_KEY,
-  baseURL: "https://api.groq.com/openai/v1",
+const openai = new OpenAI({
+  apiKey: OPENAI_API_KEY,
 });
 
 // ✅ Load embedding model
@@ -64,8 +63,8 @@ app.post("/api/chat", async (req, res) => {
       }
     }
 
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
@@ -129,8 +128,8 @@ app.post("/api/query", async (req, res) => {
       }
     }
 
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",

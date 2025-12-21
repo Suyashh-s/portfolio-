@@ -25,9 +25,10 @@ function useTypingEffect(text, speed = 80, delay = 0) {
 
   // Grapheme splitter
   function getGraphemes(str: string): string[] {
-    if (typeof (Intl as any).Segmenter === "function") {
-      const segmenter = new (Intl as any).Segmenter(undefined, { granularity: "grapheme" });
-      return Array.from(segmenter.segment(str), (s: any) => s.segment);
+    if (typeof (Intl as unknown as Record<string, unknown>).Segmenter === "function") {
+      const segmenterClass = (Intl as unknown as Record<string, new (undefined: undefined, options: Record<string, string>) => { segment: (str: string) => Iterable<{ segment: string }> }>).Segmenter;
+      const segmenter = new segmenterClass(undefined, { granularity: "grapheme" });
+      return Array.from(segmenter.segment(str), (s: { segment: string }) => s.segment);
     }
     return Array.from(str);
   }
@@ -349,7 +350,8 @@ function MiniChatbot({ navigate }: { navigate: (path: string) => void }) {
 
   const sendMessageToAPI = async (message: string) => {
     try {
-      const response = await fetch('http://localhost:8000/api/chat', {
+      const API_URL = import.meta.env.VITE_API_URL || "https://portfolio-d4fz.onrender.com/api/chat";
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -411,7 +413,7 @@ I continue to actively participate in national and international hackathons, con
       className="w-80 cursor-pointer"
       onClick={handleClick}
     >
-      <style jsx>{`
+      <style>{`
         .chat-messages::-webkit-scrollbar {
           width: 6px;
         }

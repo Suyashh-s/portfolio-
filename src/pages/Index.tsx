@@ -716,28 +716,72 @@ const Index = () => {
                   <div className="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto">
                     {/* Main About Content */}
                     <div className="flex-1">
-                      {/* Full-bleed photo7 background with glassmorphism + text */}
-                      <div className="relative rounded-3xl shadow-lg overflow-hidden border border-gray-200/50 min-h-[320px]">
-                        {/* Background image */}
+
+                      {/* MOBILE: hero image only for greeting/name, text below */}
+                      <div className="lg:hidden">
+                        <div className="relative rounded-3xl shadow-lg overflow-hidden border border-gray-200/50 min-h-[180px]">
+                          <img
+                            src="/images/photo7.jpg"
+                            alt="Suyash Sawant"
+                            className="absolute inset-0 w-full h-full object-cover object-center"
+                          />
+                          <div className="absolute inset-0 bg-black/45 backdrop-blur-[3px]" />
+                          <div className="relative z-10 p-6">
+                            <p className="text-base text-white/80 mb-1">
+                              {typedText}
+                              {isTyping && displayedCount < graphemeCount && (
+                                <span className="border-r-2 border-white/80 animate-pulse ml-1" />
+                              )}
+                            </p>
+                            <h1 className="text-2xl font-bold text-white">
+                              I'm Suyash Sawant
+                            </h1>
+                          </div>
+                        </div>
+                        <div className="space-y-3 text-sm text-gray-700 leading-relaxed mt-5">
+                          <p>
+                            Software Engineer and Full Stack Developer experienced in JavaScript, TypeScript, React, Next.js, Node.js (Express), Python, Flutter, and AI/ML technologies like TensorFlow and PyTorch. Currently pursuing a B.E. in Information Technology at Datta Meghe College of Engineering.
+                          </p>
+                          <p>
+                            Winner of <span className="font-bold text-gray-900">Smart India Hackathon 2024</span> and <span className="font-bold text-gray-900">HackUp Hackathon</span> (₹1,00,000 prize + fully sponsored trip to Dubai &amp; passes to <span className="font-bold text-gray-900">GITEX GLOBAL</span>). Finalist in InspirioBiz 5.0, Airavat 2.0, and IDE Bootcamp. I specialize in building scalable web applications, cross-platform mobile apps, and intelligent AI-powered solutions.
+                          </p>
+                          <p>
+                            Skilled in designing modern UI/UX with Figma, developing robust RESTful APIs, optimizing databases, and deploying cloud infrastructure on AWS and Cloudflare. Passionate about creating impactful, user-focused products that drive innovation and growth.
+                          </p>
+                          <p className="font-medium text-gray-900">
+                            I'm driven to create technology that feels personal, purposeful, and truly meaningful.
+                          </p>
+                        </div>
+                        <div className="mt-5">
+                          <Button
+                            className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-3 rounded-xl flex items-center gap-3 shadow transition-all duration-300 font-medium"
+                            onClick={() => setShowResumeModal(true)}
+                          >
+                            <FileText className="w-5 h-5" />
+                            View Resume
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* DESKTOP: full-bleed photo7 with all text on top */}
+                      <div className="hidden lg:block relative rounded-3xl shadow-lg overflow-hidden border border-gray-200/50 min-h-[320px]">
                         <img
                           src="/images/photo7.jpg"
                           alt="Suyash Sawant"
                           className="absolute inset-0 w-full h-full object-cover object-center"
                         />
-                        {/* Glass overlay */}
                         <div className="absolute inset-0 bg-black/45 backdrop-blur-[3px]" />
-                        {/* Content on top */}
-                        <div className="relative z-10 p-6 md:p-8">
+                        <div className="relative z-10 p-8">
                           <p className="text-base text-white/80 mb-1">
                             {typedText}
                             {isTyping && displayedCount < graphemeCount && (
                               <span className="border-r-2 border-white/80 animate-pulse ml-1" />
                             )}
                           </p>
-                          <h1 className="text-2xl lg:text-3xl font-bold text-white mb-4">
+                          <h1 className="text-3xl font-bold text-white mb-4">
                             I'm Suyash Sawant
                           </h1>
-                          <div className="hidden lg:block space-y-3 text-sm md:text-base text-white/90 leading-relaxed">
+                          <div className="space-y-3 text-base text-white/90 leading-relaxed">
                             <p>
                               Software Engineer and Full Stack Developer experienced in JavaScript, TypeScript, React, Next.js, Node.js (Express), Python, Flutter, and AI/ML technologies like TensorFlow and PyTorch. Currently pursuing a B.E. in Information Technology at Datta Meghe College of Engineering.
                             </p>
@@ -751,7 +795,7 @@ const Index = () => {
                               I'm driven to create technology that feels personal, purposeful, and truly meaningful.
                             </p>
                           </div>
-                          <div className="hidden lg:flex mt-6">
+                          <div className="mt-6">
                             <Button
                               className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white border border-white/40 px-8 py-3 rounded-xl flex items-center gap-3 shadow-xl transition-all duration-300 hover:scale-105 font-medium"
                               onClick={() => setShowResumeModal(true)}
@@ -762,6 +806,7 @@ const Index = () => {
                           </div>
                         </div>
                       </div>
+
                     </div>
 
                     {/* Mini Chatbot */}

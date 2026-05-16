@@ -136,7 +136,7 @@ function Preloader({ onFinish }: { onFinish: () => void }) {
   );
 }
 
-export const RESUME_URL = import.meta.env.VITE_RESUME_URL || "https://pub-c31ada0ae90b4637b66c95c2e1fef0f6.r2.dev/resume.pdf";
+export const RESUME_URL = import.meta.env.VITE_RESUME_URL || "https://drive.google.com/file/d/15pcxwlRvemgyewQxfCb9PzD5ynJjYaa1/preview";
 
 // Projects Data
 const projects = [
@@ -718,7 +718,7 @@ const Index = () => {
                     <div className="flex-1">
 
                       {/* MOBILE: hero image only for greeting/name, text below */}
-                      <div className="lg:hidden">
+                      <div className="md:hidden">
                         <div className="relative rounded-3xl shadow-lg overflow-hidden border border-gray-200/50 min-h-[260px] flex flex-col">
                           <img
                             src="/images/photo7.jpg"
@@ -765,7 +765,7 @@ const Index = () => {
                       </div>
 
                       {/* DESKTOP: full-bleed photo7 with all text on top */}
-                      <div className="hidden lg:block relative rounded-3xl shadow-lg overflow-hidden border border-gray-200/50 min-h-[320px]">
+                      <div className="hidden md:block relative rounded-3xl shadow-lg overflow-hidden border border-gray-200/50 min-h-[320px]">
                         <img
                           src="/images/photo7.jpg"
                           alt="Suyash Sawant"

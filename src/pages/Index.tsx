@@ -305,7 +305,7 @@ function ResumeModal({ open, onClose }: { open: boolean; onClose: () => void }) 
         {/* Action Button */}
         {isMobile ? (
           <a
-            href={RESUME_URL}
+            href={RESUME_URL.replace(/\/preview$/, '/view')}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white px-6 py-2 rounded-lg font-medium shadow-md transition-all duration-200"
@@ -719,12 +719,13 @@ const Index = () => {
 
                       {/* MOBILE: hero image only for greeting/name, text below */}
                       <div className="lg:hidden">
-                        <div className="relative rounded-3xl shadow-lg overflow-hidden border border-gray-200/50 min-h-[220px] flex flex-col">
+                        <div className="relative rounded-3xl shadow-lg overflow-hidden border border-gray-200/50 min-h-[260px] flex flex-col">
                           <img
                             src="/images/photo7.jpg"
                             alt="Suyash Sawant"
                             className="absolute inset-0 w-full h-full object-cover object-top"
                           />
+                          <div className="absolute inset-0 backdrop-blur-[2px]" />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
                           <div className="relative z-10 mt-auto p-6">
                             <p className="text-base text-white/80 mb-1">

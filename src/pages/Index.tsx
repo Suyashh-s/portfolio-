@@ -719,14 +719,14 @@ const Index = () => {
 
                       {/* MOBILE: hero image only for greeting/name, text below */}
                       <div className="lg:hidden">
-                        <div className="relative rounded-3xl shadow-lg overflow-hidden border border-gray-200/50 min-h-[180px]">
+                        <div className="relative rounded-3xl shadow-lg overflow-hidden border border-gray-200/50 min-h-[220px] flex flex-col">
                           <img
                             src="/images/photo7.jpg"
                             alt="Suyash Sawant"
-                            className="absolute inset-0 w-full h-full object-cover object-center"
+                            className="absolute inset-0 w-full h-full object-cover object-top"
                           />
-                          <div className="absolute inset-0 bg-black/45 backdrop-blur-[3px]" />
-                          <div className="relative z-10 p-6">
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                          <div className="relative z-10 mt-auto p-6">
                             <p className="text-base text-white/80 mb-1">
                               {typedText}
                               {isTyping && displayedCount < graphemeCount && (

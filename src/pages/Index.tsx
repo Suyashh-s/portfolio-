@@ -716,97 +716,50 @@ const Index = () => {
                   <div className="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto">
                     {/* Main About Content */}
                     <div className="flex-1">
-                      <div className="bg-white/60 backdrop-blur-xl rounded-3xl p-6 md:p-8 shadow-lg border border-gray-200/50">
-                        <div className="flex flex-col md:flex-row items-start gap-4 md:gap-8">
-                          {/* Profile Image */}
-                          <div className="flex-shrink-0 flex justify-center items-center w-20 h-20 md:w-48 md:h-60 lg:w-56 lg:h-72">
-                            <div className="relative w-20 h-20 md:w-48 md:h-60 lg:w-56 lg:h-72 rounded-2xl shadow-2xl overflow-hidden">
-                              <img
-                                src="/images/photo7.jpg"
-                                alt="Suyash Sawant"
-                                className="absolute inset-0 w-full h-full object-cover"
-                              />
-                              {/* Glassmorphism overlay */}
-                              <div className="absolute inset-0 bg-white/20 backdrop-blur-[2px]" />
-                              {/* Text on top */}
-                              <div className="absolute inset-0 flex flex-col justify-end p-3">
-                                <p className="text-white text-xs font-bold drop-shadow-lg leading-tight">Suyash Sawant</p>
-                                <p className="text-white/90 text-[10px] drop-shadow leading-tight">🏆 HackUp Winner</p>
-                                <p className="text-white/80 text-[9px] drop-shadow leading-tight">GITEX GLOBAL '25</p>
-                              </div>
-                            </div>
+                      {/* Full-bleed photo7 background with glassmorphism + text */}
+                      <div className="relative rounded-3xl shadow-lg overflow-hidden border border-gray-200/50 min-h-[320px]">
+                        {/* Background image */}
+                        <img
+                          src="/images/photo7.jpg"
+                          alt="Suyash Sawant"
+                          className="absolute inset-0 w-full h-full object-cover object-center"
+                        />
+                        {/* Glass overlay */}
+                        <div className="absolute inset-0 bg-black/45 backdrop-blur-[3px]" />
+                        {/* Content on top */}
+                        <div className="relative z-10 p-6 md:p-8">
+                          <p className="text-base text-white/80 mb-1">
+                            {typedText}
+                            {isTyping && displayedCount < graphemeCount && (
+                              <span className="border-r-2 border-white/80 animate-pulse ml-1" />
+                            )}
+                          </p>
+                          <h1 className="text-2xl lg:text-3xl font-bold text-white mb-4">
+                            I'm Suyash Sawant
+                          </h1>
+                          <div className="space-y-3 text-sm md:text-base text-white/90 leading-relaxed">
+                            <p>
+                              Software Engineer and Full Stack Developer experienced in JavaScript, TypeScript, React, Next.js, Node.js (Express), Python, Flutter, and AI/ML technologies like TensorFlow and PyTorch. Currently pursuing a B.E. in Information Technology at Datta Meghe College of Engineering.
+                            </p>
+                            <p>
+                              Winner of <span className="font-bold text-white">Smart India Hackathon 2024</span> and <span className="font-bold text-white">HackUp Hackathon</span> (₹1,00,000 prize + fully sponsored trip to Dubai &amp; passes to <span className="font-bold text-white">GITEX GLOBAL</span>). Finalist in InspirioBiz 5.0, Airavat 2.0, and IDE Bootcamp. I specialize in building scalable web applications, cross-platform mobile apps, and intelligent AI-powered solutions.
+                            </p>
+                            <p>
+                              Skilled in designing modern UI/UX with Figma, developing robust RESTful APIs, optimizing databases, and deploying cloud infrastructure on AWS and Cloudflare. Passionate about creating impactful, user-focused products that drive innovation and growth.
+                            </p>
+                            <p className="font-medium text-white">
+                              I'm driven to create technology that feels personal, purposeful, and truly meaningful.
+                            </p>
                           </div>
-                          {/* Mobile: Greeting and Name beside image; Desktop: all text stacked */}
-                          <div className="flex-1">
-                            {/* Mobile only: greeting and name beside image */}
-                            <div className="flex flex-col md:hidden justify-center">
-                              <p className="text-base text-gray-600 mb-1">
-                                {typedText}
-                                {isTyping && displayedCount < graphemeCount && (
-                                  <span className="border-r-2 border-gray-600 animate-pulse ml-1" />
-                                )}
-                              </p>
-                              <h1 className="text-xl font-bold text-gray-900 mb-2">
-                                I'm Suyash Sawant
-                              </h1>
-                            </div>
-                            {/* Desktop only: greeting, name, and about stacked */}
-                            <div className="hidden md:block">
-                              <p className="text-lg text-gray-600 mb-3">
-                                {typedText}
-                                {isTyping && displayedCount < graphemeCount && (
-                                  <span className="border-r-2 border-gray-600 animate-pulse ml-1" />
-                                )}
-                              </p>
-                              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">
-                                I'm Suyash Sawant
-                              </h1>
-                              <div className="space-y-3 md:space-y-4 text-base text-gray-700 leading-relaxed">
-                                <p>
-                                  Software Engineer and Full Stack Developer experienced in JavaScript, TypeScript, React, Next.js, Node.js (Express), Python, Flutter, and AI/ML technologies like TensorFlow and PyTorch. Currently pursuing a B.E. in Information Technology at Datta Meghe College of Engineering.
-                                </p>
-                                <p>
-                                  Winner of <span className="font-bold">Smart India Hackathon 2024</span> and <span className="font-bold">HackUp Hackathon</span> (₹1,00,000 prize + fully sponsored trip to Dubai &amp; passes to <span className="font-bold">GITEX GLOBAL</span>). Finalist in multiple national competitions including InspirioBiz 5.0, Airavat 2.0, and IDE Bootcamp. I specialize in building scalable web applications, cross-platform mobile apps, and intelligent AI-powered solutions.
-                                </p>
-                                <p>
-                                  Skilled in designing modern UI/UX with Figma, developing robust RESTful APIs, optimizing databases, and deploying cloud infrastructure on AWS and Cloudflare. Passionate about creating impactful, user-focused products that drive innovation and growth.
-                                </p>
-                                <p className="font-medium text-gray-800">
-                                  I'm driven to create technology that feels personal, purposeful, and truly meaningful.
-                                </p>
-                              </div>
-                              <div className="mt-6">
-                                <Button
-                                  className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white px-8 py-3 rounded-xl flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 border-0 font-medium"
-                                  onClick={() => setShowResumeModal(true)}
-                                >
-                                  <FileText className="w-5 h-5" />
-                                  View Resume
-                                </Button>
-                              </div>
-                            </div>
+                          <div className="mt-6">
+                            <Button
+                              className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white border border-white/40 px-8 py-3 rounded-xl flex items-center gap-3 shadow-xl transition-all duration-300 hover:scale-105 font-medium"
+                              onClick={() => setShowResumeModal(true)}
+                            >
+                              <FileText className="w-5 h-5" />
+                              View Resume
+                            </Button>
                           </div>
-                        </div>
-                      </div>
-                      {/* Mobile only: rest of the about text and button below */}
-                      <div className="block md:hidden space-y-3 text-sm text-gray-700 leading-relaxed mt-4 px-6">
-                        <p>
-                          Software Engineer and Full Stack Developer experienced in JavaScript, TypeScript, React, Next.js, Node.js (Express), Python, Flutter, and AI/ML technologies like TensorFlow and PyTorch. Currently pursuing a B.E. in Information Technology at Datta Meghe College of Engineering.
-                        </p>
-                        <p>
-                          Winner of <span className="font-bold">Smart India Hackathon 2024</span> and <span className="font-bold">HackUp Hackathon</span> (₹1,00,000 + Dubai trip + <span className="font-bold">GITEX GLOBAL</span> passes). Finalist in InspirioBiz 5.0, Airavat 2.0, and IDE Bootcamp. I build scalable web apps, mobile apps, and AI-powered solutions.
-                        </p>
-                        <p className="font-medium text-gray-800">
-                          I'm driven to create technology that feels personal, purposeful, and truly meaningful.
-                        </p>
-                        <div className="mt-4">
-                          <Button
-                            className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white px-8 py-3 rounded-xl flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 border-0 font-medium"
-                            onClick={() => setShowResumeModal(true)}
-                          >
-                            <FileText className="w-5 h-5" />
-                            View Resume
-                          </Button>
                         </div>
                       </div>
                     </div>

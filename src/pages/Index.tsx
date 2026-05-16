@@ -737,7 +737,7 @@ const Index = () => {
                           <h1 className="text-2xl lg:text-3xl font-bold text-white mb-4">
                             I'm Suyash Sawant
                           </h1>
-                          <div className="space-y-3 text-sm md:text-base text-white/90 leading-relaxed">
+                          <div className="hidden lg:block space-y-3 text-sm md:text-base text-white/90 leading-relaxed">
                             <p>
                               Software Engineer and Full Stack Developer experienced in JavaScript, TypeScript, React, Next.js, Node.js (Express), Python, Flutter, and AI/ML technologies like TensorFlow and PyTorch. Currently pursuing a B.E. in Information Technology at Datta Meghe College of Engineering.
                             </p>
@@ -751,7 +751,7 @@ const Index = () => {
                               I'm driven to create technology that feels personal, purposeful, and truly meaningful.
                             </p>
                           </div>
-                          <div className="mt-6">
+                          <div className="hidden lg:flex mt-6">
                             <Button
                               className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white border border-white/40 px-8 py-3 rounded-xl flex items-center gap-3 shadow-xl transition-all duration-300 hover:scale-105 font-medium"
                               onClick={() => setShowResumeModal(true)}

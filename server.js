@@ -1,8 +1,7 @@
-import express from "express";
+﻿import express from "express";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
-import { QdrantClient } from "@qdrant/js-client-rest";
 import OpenAI from "openai";
 import { pipeline } from "@xenova/transformers";
 import dotenv from "dotenv";
@@ -14,206 +13,205 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Qdrant setup
-const QDRANT_API_KEY = process.env.QDRANT_API_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.MrrpTeWT0if2DFKgpnU5XA2N6ZMIGf3BcvthRfaCBD8";
-const qdrant = new QdrantClient({
-  url: "https://b266344a-9319-41de-92c5-e3042ae0735c.eu-west-2-0.aws.cloud.qdrant.io:6333",
-  apiKey: QDRANT_API_KEY,
-  checkCompatibility: false,
-});
-
-// ✅ OpenAI setup
+// â”€â”€ OpenAI â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 if (!OPENAI_API_KEY) {
-  console.warn("⚠️  OPENAI_API_KEY not found in environment variables");
+  console.warn("âš ï¸  OPENAI_API_KEY not found in environment variables");
 }
-const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY,
-});
+const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
-// ✅ Load local portfolio data as Qdrant fallback
+// â”€â”€ Load local portfolio data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let localPortfolioText = "";
+let localEntries = [];
 try {
   const raw = fs.readFileSync(new URL('./my_data.json', import.meta.url), 'utf8');
-  const entries = JSON.parse(raw);
-  localPortfolioText = entries.map(e => e.text || "").filter(Boolean).join("\n\n");
-  console.log(`✅ Loaded ${entries.length} local portfolio entries as fallback`);
+  localEntries = JSON.parse(raw);
+  localPortfolioText = localEntries.map(e => e.text || "").filter(Boolean).join("\n\n");
+  console.log(`âœ… Loaded ${localEntries.length} local portfolio entries`);
 } catch (e) {
-  console.warn("⚠️  Could not load my_data.json:", e.message);
+  console.warn("âš ï¸  Could not load my_data.json:", e.message);
 }
 
-// ✅ Load embedding model
+// â”€â”€ In-memory vector store (replaces Qdrant) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Each entry: { id, text, images, vector: Float32Array }
+let vectorStore = [];
+
+function cosineSimilarity(a, b) {
+  let dot = 0, na = 0, nb = 0;
+  for (let i = 0; i < a.length; i++) {
+    dot += a[i] * b[i];
+    na  += a[i] * a[i];
+    nb  += b[i] * b[i];
+  }
+  return dot / (Math.sqrt(na) * Math.sqrt(nb) || 1);
+}
+
+function vectorSearch(queryVec) {
+  if (vectorStore.length === 0) return null;
+  let best = -2, bestEntry = null;
+  for (const entry of vectorStore) {
+    const sim = cosineSimilarity(queryVec, entry.vector);
+    if (sim > best) { best = sim; bestEntry = entry; }
+  }
+  return bestEntry;
+}
+
+// â”€â”€ Keyword fallback (instant, no embedding) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+function findLocalContext(query) {
+  const q = query.toLowerCase();
+  const keywordMap = [
+    { ids: ["achievements"], keywords: ["achievement", "hackathon", "award", "win", "won", "prize", "competition", "milestone", "accomplishment", "recognition", "gitex", "hackup", "dubai"] },
+    { ids: ["skills"],       keywords: ["skill", "tech", "language", "framework", "stack", "code", "programming", "tool", "expertise", "experience"] },
+    { ids: ["projects"],     keywords: ["project", "built", "build", "work", "portfolio", "app", "software", "developed"] },
+    { ids: ["goals"],        keywords: ["goal", "future", "plan", "vision", "aspire", "ambition", "startup", "dream"] },
+    { ids: ["fun"],          keywords: ["hobby", "fun", "interest", "free time", "outside", "relax", "passion", "enjoy"] },
+    { ids: ["bio"],          keywords: ["who", "about", "yourself", "background", "introduce", "bio", "story"] },
+  ];
+  for (const { ids, keywords } of keywordMap) {
+    if (keywords.some(k => q.includes(k))) {
+      const entries = localEntries.filter(e => ids.includes(e.id));
+      if (entries.length > 0) {
+        return {
+          text:   entries.map(e => e.text || "").join("\n\n"),
+          images: entries.flatMap(e => e.images || []),
+        };
+      }
+    }
+  }
+  return { text: localPortfolioText, images: [] };
+}
+
+// â”€â”€ Load embedding model + build vector store â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 let embedder;
 let embedderReady = false;
+
 (async () => {
   try {
-    console.log("⏳ Loading embedding model...");
+    console.log("â³ Loading embedding model...");
     embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
+    console.log("âœ… Embedding model loaded! Building vector store...");
+
+    for (const entry of localEntries) {
+      if (!entry.text) continue;
+      const emb = await embedder(entry.text, { pooling: "mean", normalize: true });
+      vectorStore.push({
+        id:     entry.id,
+        text:   entry.text,
+        images: entry.images || [],
+        vector: Array.from(emb.data),
+      });
+    }
     embedderReady = true;
-    console.log("✅ Embedding model loaded!");
+    console.log(`âœ… Vector store ready â€” ${vectorStore.length} entries indexed`);
   } catch (err) {
     console.error("Failed to load embedding model:", err?.message || err);
   }
 })();
 
+// â”€â”€ Debug logger â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function debugLog(...args) {
-  const line = new Date().toISOString() + ' ' + args.map(a => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ');
+  const line = new Date().toISOString() + ' ' + args.map(a => typeof a === 'string' ? a : JSON.stringify(a)).join(' ');
   console.log(line);
-  try { fs.appendFileSync('server-debug.log', line + '\n'); } catch (e) {}
+  try { fs.appendFileSync('server-debug.log', line + '\n'); } catch (_) {}
 }
 
-// ✅ API route
+// â”€â”€ Shared search helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+async function retrieveContext(query) {
+  // 1. Fast keyword match
+  const localCtx = findLocalContext(query);
+
+  // 2. Semantic vector search (when embedder is ready)
+  if (embedderReady) {
+    try {
+      const emb = await embedder(query, { pooling: "mean", normalize: true });
+      const queryVec = Array.from(emb.data);
+      const best = vectorSearch(queryVec);
+      if (best) {
+        debugLog(`[ vector ] matched entry: ${best.id}`);
+        const lowerQ = query.toLowerCase();
+        const showImages = /(achievement|hackathon|about me|tell me about yourself)/.test(lowerQ);
+        return { text: best.text, images: showImages ? best.images : localCtx.images };
+      }
+    } catch (e) {
+      debugLog('[ vector ] search failed, using keyword fallback:', e.message);
+    }
+  }
+
+  return localCtx;
+}
+
+const SYSTEM_PROMPT = "You are Suyash Sawant, and you're answering in first person but don't write 'As Suyash Sawant' unnecessarily. Write clearly, professionally, and in a structured, elegant style. Use bullet points, line breaks, and markdown formatting as needed. When necessary, bold important words (using ** **), or use headings (like ## or ###) to organize sections and emphasize key points. Avoid overly casual words or emojis. Only provide a direct answer â€” do not mention that you are an assistant or AI.";
+
+// â”€â”€ /api/chat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.post("/api/chat", async (req, res) => {
   const { message } = req.body;
   if (!message) return res.status(400).json({ error: "No message provided" });
-  debugLog('[ /api/chat ] request received');
-  if (!embedderReady) {
-    return res.status(503).json({ response: "Server starting up: embedding model still loading — please try again in a few seconds.", images: [] });
-  }
+  debugLog('[ /api/chat ] received:', message.slice(0, 80));
 
   if (!OPENAI_API_KEY) {
-    console.error("OpenAI API key missing when handling /api/chat request");
     return res.status(500).json({ response: "Server misconfiguration: missing OpenAI API key.", images: [] });
   }
 
-  let qdrantText = localPortfolioText || "I couldn't find any exact match in my data.";
-  let images = [];
-
-  // ── Qdrant vector search (best-effort — falls back to local data if unavailable) ──
-  try {
-    debugLog('[ /api/chat ] computing embeddings');
-    const embeddings = await embedder(message, { pooling: "mean", normalize: true });
-    debugLog('[ /api/chat ] embeddings computed');
-    const vector = Array.from(embeddings.data);
-
-    debugLog('[ /api/chat ] searching qdrant');
-    const results = await qdrant.search("portfolio", {
-      vector,
-      limit: 1,
-      with_payload: true,
-    });
-    debugLog('[ /api/chat ] qdrant search complete - results:', results.length);
-
-    if (results.length > 0 && results[0].payload && results[0].payload.text) {
-      qdrantText = results[0].payload.text;
-      const lowerQuery = message.toLowerCase();
-      if (/(achievement|hackathon|about me|tell me about yourself)/.test(lowerQuery)) {
-        images = results[0].payload.images || [];
-      }
-    }
-  } catch (qdrantErr) {
-    debugLog('[ /api/chat ] Qdrant unavailable, using local fallback:', qdrantErr.message);
-  }
+  const { text: contextText, images } = await retrieveContext(message);
 
   try {
-    debugLog('[ /api/chat ] calling OpenAI chat completion');
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        {
-          role: "system",
-          content: "You are Suyash Sawant, and you're answering in first person but don't write 'As Suyash Sawant' unnecessarily. Write clearly, professionally, and in a structured, elegant style. Use bullet points, line breaks, and markdown formatting as needed. When necessary, bold important words (using ** **), or use headings (like ## or ###) to organize sections and emphasize key points. Avoid overly casual words or emojis. Only provide a direct answer — do not mention that you are an assistant or AI."
-        },
-        {
-          role: "user",
-          content: `Use this context if helpful: "${qdrantText}". User question: "${message}"`
-        }
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user",   content: `Use this context if helpful: "${contextText}". User question: "${message}"` },
       ],
     });
-    debugLog('[ /api/chat ] OpenAI returned completion');
-    let cleanedAnswer = completion.choices[0].message.content.trim();
-    if (cleanedAnswer.startsWith("```html")) cleanedAnswer = cleanedAnswer.slice(6).trim();
-    if (cleanedAnswer.startsWith("```"))     cleanedAnswer = cleanedAnswer.slice(3).trim();
-    if (cleanedAnswer.endsWith("```"))       cleanedAnswer = cleanedAnswer.slice(0, -3).trim();
-    res.json({ response: cleanedAnswer, images });
+    let answer = completion.choices[0].message.content.trim()
+      .replace(/^```html\n?/, "").replace(/^```\n?/, "").replace(/```$/, "").trim();
+    debugLog('[ /api/chat ] done');
+    res.json({ response: answer, images });
   } catch (error) {
     console.error("Error in /api/chat:", error?.message || error);
-    return res.status(500).json({ response: "Sorry, I'm having trouble connecting right now. Please try again in a moment.", images: [] });
+    res.status(500).json({ response: "Sorry, I'm having trouble connecting right now. Please try again in a moment.", images: [] });
   }
 });
 
-// Keep the original /api/query endpoint for compatibility
+// â”€â”€ /api/query (kept for compatibility) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.post("/api/query", async (req, res) => {
   const { query } = req.body;
   if (!query) return res.status(400).json({ error: "No query provided" });
-  debugLog('[ /api/query ] request received');
-  if (!embedderReady) {
-    return res.status(503).json({ answer: "Server starting up: embedding model still loading — please try again in a few seconds.", images: [] });
-  }
+  debugLog('[ /api/query ] received:', query.slice(0, 80));
 
   if (!OPENAI_API_KEY) {
-    console.error("OpenAI API key missing when handling /api/query request");
     return res.status(500).json({ answer: "Server misconfiguration: missing OpenAI API key.", images: [] });
   }
 
-  let qdrantText = localPortfolioText || "I couldn't find any exact match in my data.";
-  let images = [];
-
-  // ── Qdrant vector search (best-effort — falls back to local data if unavailable) ──
-  try {
-    debugLog('[ /api/query ] computing embeddings');
-    const embeddings = await embedder(query, { pooling: "mean", normalize: true });
-    debugLog('[ /api/query ] embeddings computed');
-    const vector = Array.from(embeddings.data);
-
-    debugLog('[ /api/query ] searching qdrant');
-    const results = await qdrant.search("portfolio", {
-      vector,
-      limit: 1,
-      with_payload: true,
-    });
-    debugLog('[ /api/query ] qdrant search complete - results:', results.length);
-
-    if (results.length > 0 && results[0].payload && results[0].payload.text) {
-      qdrantText = results[0].payload.text;
-      const lowerQuery = query.toLowerCase();
-      if (/(achievement|hackathon|about me|tell me about yourself)/.test(lowerQuery)) {
-        images = results[0].payload.images || [];
-      }
-    }
-  } catch (qdrantErr) {
-    debugLog('[ /api/query ] Qdrant unavailable, using local fallback:', qdrantErr.message);
-  }
+  const { text: contextText, images } = await retrieveContext(query);
 
   try {
-    debugLog('[ /api/query ] calling OpenAI chat completion');
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        {
-          role: "system",
-          content: "You are Suyash Sawant, and you're answering in first person but don't write 'As Suyash Sawant' unnecessarily. Write clearly, professionally, and in a structured, elegant style. Use bullet points, line breaks, and markdown formatting as needed. When necessary, bold important words (using ** **), or use headings (like ## or ###) to organize sections and emphasize key points. Avoid overly casual words or emojis. Only provide a direct answer — do not mention that you are an assistant or AI."
-        },
-        {
-          role: "user",
-          content: `Use this context if helpful: "${qdrantText}". User question: "${query}"`
-        }
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user",   content: `Use this context if helpful: "${contextText}". User question: "${query}"` },
       ],
     });
-    debugLog('[ /api/query ] OpenAI returned completion');
-    let cleanedAnswer = completion.choices[0].message.content.trim();
-    if (cleanedAnswer.startsWith("```html")) cleanedAnswer = cleanedAnswer.slice(6).trim();
-    if (cleanedAnswer.startsWith("```"))     cleanedAnswer = cleanedAnswer.slice(3).trim();
-    if (cleanedAnswer.endsWith("```"))       cleanedAnswer = cleanedAnswer.slice(0, -3).trim();
-    res.json({ answer: cleanedAnswer, images });
+    let answer = completion.choices[0].message.content.trim()
+      .replace(/^```html\n?/, "").replace(/^```\n?/, "").replace(/```$/, "").trim();
+    debugLog('[ /api/query ] done');
+    res.json({ answer, images });
   } catch (error) {
     console.error("Error in /api/query:", error?.message || error);
-    return res.status(500).json({ answer: "Sorry, I'm having trouble connecting right now. Please try again in a moment.", images: [] });
+    res.status(500).json({ answer: "Sorry, I'm having trouble connecting right now. Please try again in a moment.", images: [] });
   }
 });
 
-// ✅ Serve Vite frontend from dist in production
+// â”€â”€ Serve Vite frontend (production) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
+const __dirname  = path.dirname(__filename);
 app.use(express.static(path.join(__dirname, "dist")));
-
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
-// ✅ Start server
+// â”€â”€ Start â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+  console.log(`âœ… Server running on http://localhost:${PORT}`);
 });

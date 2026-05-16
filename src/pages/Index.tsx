@@ -25,9 +25,15 @@ function useTypingEffect(text, speed = 80, delay = 0) {
 
   // Grapheme splitter
   function getGraphemes(str: string): string[] {
-    if (typeof (Intl as any).Segmenter === "function") {
-      const segmenter = new (Intl as any).Segmenter(undefined, { granularity: "grapheme" });
-      return Array.from(segmenter.segment(str), (s: any) => s.segment);
+    type IntlWithSegmenter = typeof Intl & {
+      Segmenter: new (
+        locale?: string,
+        options?: { granularity?: string }
+      ) => { segment: (s: string) => Iterable<{ segment: string }> };
+    };
+    if (typeof (Intl as IntlWithSegmenter).Segmenter === "function") {
+      const segmenter = new (Intl as IntlWithSegmenter).Segmenter(undefined, { granularity: "grapheme" });
+      return Array.from(segmenter.segment(str), (s) => s.segment);
     }
     return Array.from(str);
   }
@@ -92,7 +98,7 @@ function Preloader({ onFinish }: { onFinish: () => void }) {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setTimeout>;
     if (index === 0) {
       timer = setTimeout(() => setIndex(i => i + 1), 500); // 200ms for "Hello"
     } else if (index < greetings.length - 2) {
@@ -417,7 +423,7 @@ I continue to actively participate in national and international hackathons, con
       className="w-80 cursor-pointer"
       onClick={handleClick}
     >
-      <style jsx>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         .chat-messages::-webkit-scrollbar {
           width: 6px;
         }
@@ -432,7 +438,7 @@ I continue to actively participate in national and international hackathons, con
         .chat-messages::-webkit-scrollbar-thumb:hover {
           background: #9CA3AF;
         }
-      `}</style>
+      ` }} />
       <Card className="bg-white/95 backdrop-blur-xl border-gray-200/50 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-[1.02] h-[36rem] flex flex-col">
         {/* Chat Header */}
         <div className="flex items-center gap-3 p-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-purple-50 rounded-t-lg">

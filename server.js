@@ -165,6 +165,7 @@ app.post("/api/chat", async (req, res) => {
       const stream = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         stream: true,
+        max_tokens: 300,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user",   content: `Context: "${contextText}"\n\nQuestion: "${message}"` },
@@ -188,6 +189,7 @@ app.post("/api/chat", async (req, res) => {
   try {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
+      max_tokens: 300,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
         { role: "user",   content: `Context: "${contextText}"\n\nQuestion: "${message}"` },
@@ -218,9 +220,10 @@ app.post("/api/query", async (req, res) => {
   try {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
+      max_tokens: 300,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        { role: "user",   content: `Use this context if helpful: "${contextText}". User question: "${query}"` },
+        { role: "user",   content: `Context: "${contextText}"\n\nQuestion: "${query}"` },
       ],
     });
     let answer = completion.choices[0].message.content.trim()

@@ -719,13 +719,21 @@ const Index = () => {
                       <div className="bg-white/60 backdrop-blur-xl rounded-3xl p-6 md:p-8 shadow-lg border border-gray-200/50">
                         <div className="flex flex-col md:flex-row items-start gap-4 md:gap-8">
                           {/* Profile Image */}
-                          <div className="flex-shrink-0 flex justify-center items-center w-20 h-20 md:w-48 md:h-60 lg:w-56 lg:h-70">
-                            <div className="w-20 h-20 md:w-48 md:h-60 lg:w-56 lg:h-70 rounded-2xl bg-gradient-to-br from-orange-200 via-pink-200 to-purple-200 flex items-center justify-center shadow-2xl overflow-hidden">
+                          <div className="flex-shrink-0 flex justify-center items-center w-20 h-20 md:w-48 md:h-60 lg:w-56 lg:h-72">
+                            <div className="relative w-20 h-20 md:w-48 md:h-60 lg:w-56 lg:h-72 rounded-2xl shadow-2xl overflow-hidden">
                               <img
-                                src="https://pub-c31ada0ae90b4637b66c95c2e1fef0f6.r2.dev/about.jpg"
+                                src="/images/photo7.jpg"
                                 alt="Suyash Sawant"
-                                className="w-full h-full object-cover"
+                                className="absolute inset-0 w-full h-full object-cover"
                               />
+                              {/* Glassmorphism overlay */}
+                              <div className="absolute inset-0 bg-white/20 backdrop-blur-[2px]" />
+                              {/* Text on top */}
+                              <div className="absolute inset-0 flex flex-col justify-end p-3">
+                                <p className="text-white text-xs font-bold drop-shadow-lg leading-tight">Suyash Sawant</p>
+                                <p className="text-white/90 text-[10px] drop-shadow leading-tight">🏆 HackUp Winner</p>
+                                <p className="text-white/80 text-[9px] drop-shadow leading-tight">GITEX GLOBAL '25</p>
+                              </div>
                             </div>
                           </div>
                           {/* Mobile: Greeting and Name beside image; Desktop: all text stacked */}
@@ -758,7 +766,7 @@ const Index = () => {
                                   Software Engineer and Full Stack Developer experienced in JavaScript, TypeScript, React, Next.js, Node.js (Express), Python, Flutter, and AI/ML technologies like TensorFlow and PyTorch. Currently pursuing a B.E. in Information Technology at Datta Meghe College of Engineering.
                                 </p>
                                 <p>
-                                  Winner of <span className="font-bold">Smart India Hackathon 2024</span> and a finalist in multiple national hackathons, including InspirioBiz 5.0 and Airavat 2.0. I specialize in building scalable web applications, cross-platform mobile apps, and intelligent AI-powered solutions that address real-world challenges.
+                                  Winner of <span className="font-bold">Smart India Hackathon 2024</span> and <span className="font-bold">HackUp Hackathon</span> (₹1,00,000 prize + fully sponsored trip to Dubai &amp; passes to <span className="font-bold">GITEX GLOBAL</span>). Finalist in multiple national competitions including InspirioBiz 5.0, Airavat 2.0, and IDE Bootcamp. I specialize in building scalable web applications, cross-platform mobile apps, and intelligent AI-powered solutions.
                                 </p>
                                 <p>
                                   Skilled in designing modern UI/UX with Figma, developing robust RESTful APIs, optimizing databases, and deploying cloud infrastructure on AWS and Cloudflare. Passionate about creating impactful, user-focused products that drive innovation and growth.
@@ -786,7 +794,7 @@ const Index = () => {
                           Software Engineer and Full Stack Developer experienced in JavaScript, TypeScript, React, Next.js, Node.js (Express), Python, Flutter, and AI/ML technologies like TensorFlow and PyTorch. Currently pursuing a B.E. in Information Technology at Datta Meghe College of Engineering.
                         </p>
                         <p>
-                          Winner of <span className="font-bold">Smart India Hackathon 2024</span> and a finalist in multiple national hackathons, including InspirioBiz 5.0 and Airavat 2.0. I specialize in building scalable web applications, cross-platform mobile apps, and intelligent AI-powered solutions that address real-world challenges.
+                          Winner of <span className="font-bold">Smart India Hackathon 2024</span> and <span className="font-bold">HackUp Hackathon</span> (₹1,00,000 + Dubai trip + <span className="font-bold">GITEX GLOBAL</span> passes). Finalist in InspirioBiz 5.0, Airavat 2.0, and IDE Bootcamp. I build scalable web apps, mobile apps, and AI-powered solutions.
                         </p>
                         <p className="font-medium text-gray-800">
                           I'm driven to create technology that feels personal, purposeful, and truly meaningful.

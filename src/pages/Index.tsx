@@ -136,7 +136,7 @@ function Preloader({ onFinish }: { onFinish: () => void }) {
   );
 }
 
-export const RESUME_URL = "https://pub-c31ada0ae90b4637b66c95c2e1fef0f6.r2.dev/resume.pdf";
+export const RESUME_URL = import.meta.env.VITE_RESUME_URL || "https://pub-c31ada0ae90b4637b66c95c2e1fef0f6.r2.dev/resume.pdf";
 
 // Projects Data
 const projects = [

@@ -30,7 +30,7 @@ function isMobileDevice() {
   return /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
 }
 
-const RESUME_URL = import.meta.env.VITE_RESUME_URL || "https://pub-c31ada0ae90b4637b66c95c2e1fef0f6.r2.dev/resume.pdf";
+const RESUME_URL = import.meta.env.VITE_RESUME_URL || "https://drive.google.com/file/d/15pcxwlRvemgyewQxfCb9PzD5ynJjYaa1/preview";
 
 function ResumeModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [isMobile, setIsMobile] = useState(false);

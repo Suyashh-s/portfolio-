@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import GalleryScene from "@/components/gallery/GalleryScene";
 
 // Types
 interface Project {
@@ -25,9 +26,10 @@ function useTypingEffect(text, speed = 80, delay = 0) {
 
   // Grapheme splitter
   function getGraphemes(str: string): string[] {
-    if (typeof (Intl as any).Segmenter === "function") {
-      const segmenter = new (Intl as any).Segmenter(undefined, { granularity: "grapheme" });
-      return Array.from(segmenter.segment(str), (s: any) => s.segment);
+    if (typeof (Intl as unknown as Record<string, unknown>).Segmenter === "function") {
+      const segmenterClass = (Intl as unknown as Record<string, new (undefined: undefined, options: Record<string, string>) => { segment: (str: string) => Iterable<{ segment: string }> }>).Segmenter;
+      const segmenter = new segmenterClass(undefined, { granularity: "grapheme" });
+      return Array.from(segmenter.segment(str), (s: { segment: string }) => s.segment);
     }
     return Array.from(str);
   }
@@ -212,12 +214,6 @@ const skills = {
 
 const achievements = [
   {
-    title: "HackUp – Winner 🏆 (₹1 Lakh + Dubai Trip + GITEX GLOBAL)",
-    issuer: "HackUp Hackathon",
-    date: "2025",
-    description: "Won 1st place at HackUp Hackathon, earning a ₹1,00,000 cash prize along with a fully sponsored trip to Dubai and exclusive passes to GITEX GLOBAL — one of the world's largest technology events."
-  },
-  {
     title: "Smart India Hackathon 2024 – Winner (National Level)",
     issuer: "Smart India Hackathon",
     date: "2024",
@@ -355,7 +351,8 @@ function MiniChatbot({ navigate }: { navigate: (path: string) => void }) {
 
   const sendMessageToAPI = async (message: string) => {
     try {
-      const response = await fetch('http://localhost:8000/api/chat', {
+      const API_URL = import.meta.env.VITE_API_URL || "https://portfolio-d4fz.onrender.com/api/chat";
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -385,9 +382,9 @@ function MiniChatbot({ navigate }: { navigate: (path: string) => void }) {
       setTimeout(() => {
         addMessage(`Here are some of my key achievements and hackathon milestones:
 
-🥇 **Winner** — HackUp Hackathon — **1st Place**, ₹1,00,000 prize + fully sponsored trip to Dubai + passes to **GITEX GLOBAL** (one of the world's largest tech events)!
-
 🏆 **Winner** — Smart India Hackathon 2024 (National Level), Government of India.
+
+🥈 **Finalist** — InspirioBiz 5.0 Case Study Competition 2025 (National Level), VESIT. My team 'Shiledar' secured a finalist position as one of the first undergraduate engineering teams to break into this business-focused competition.
 
 🌟 **Grand Finalist** — IDE Bootcamp (Edition 2, Phase 2), 2025 (National Level), Ministry of Education & Wadhwani Foundation.
 
@@ -399,7 +396,7 @@ function MiniChatbot({ navigate }: { navigate: (path: string) => void }) {
 
 I continue to actively participate in national and international hackathons, constantly pushing my skills, learning from amazing teams, and building solutions that make an impact.
 
-[IMAGES:/images/photo1.jpg,/images/photo2.jpg,/images/photo3.jpg,/images/photo4.jpg,/images/photo5.jpg,/images/photo6.jpg,/images/photo7.jpg]`, true);
+[IMAGES:/images/photo1.jpg,/images/photo2.jpg,/images/photo3.jpg,/images/photo4.jpg]`, true);
       }, 1000);
     }
   }, [hasStarted]);
@@ -417,7 +414,7 @@ I continue to actively participate in national and international hackathons, con
       className="w-80 cursor-pointer"
       onClick={handleClick}
     >
-      <style jsx>{`
+      <style>{`
         .chat-messages::-webkit-scrollbar {
           width: 6px;
         }
@@ -577,15 +574,7 @@ const Index = () => {
   const [showResumeModal, setShowResumeModal] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalProject, setModalProject] = useState<Project | null>(null);
-  const [projectsRepeat, setProjectsRepeat] = useState(2);
-  const [visionRepeat, setVisionRepeat] = useState(2);
-  const [projectsAnimDuration, setProjectsAnimDuration] = useState(30);
-  const [visionAnimDuration, setVisionAnimDuration] = useState(30);
   const [showMiniChatbot, setShowMiniChatbot] = useState(false);
-  const projectsContainerRef = useRef<HTMLDivElement>(null);
-  const projectsContentRef = useRef<HTMLDivElement>(null);
-  const visionContainerRef = useRef<HTMLDivElement>(null);
-  const visionContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!showPreloader) {
@@ -594,42 +583,6 @@ const Index = () => {
       setShowMiniChatbot(true);
     }
   }, [showPreloader]);
-
-  useEffect(() => {
-    function updateRepeats() {
-      // Projects
-      if (projectsContainerRef.current && projectsContentRef.current) {
-        const containerWidth = projectsContainerRef.current.offsetWidth;
-        const cardWidth = projectsContentRef.current.children[0]?.clientWidth || 0;
-        const cardsCount = projects.length;
-        const minContentWidth = containerWidth * 2;
-        const singleSetWidth = cardWidth * cardsCount;
-        let repeat = 2;
-        if (singleSetWidth > 0) {
-          repeat = Math.ceil(minContentWidth / singleSetWidth);
-        }
-        setProjectsRepeat(repeat < 2 ? 2 : repeat);
-        setProjectsAnimDuration(20 + repeat * 5);
-      }
-      // Vision Vault
-      if (visionContainerRef.current && visionContentRef.current) {
-        const containerWidth = visionContainerRef.current.offsetWidth;
-        const cardWidth = visionContentRef.current.children[0]?.clientWidth || 0;
-        const cardsCount = visionVaultProjects.length;
-        const minContentWidth = containerWidth * 2;
-        const singleSetWidth = cardWidth * cardsCount;
-        let repeat = 2;
-        if (singleSetWidth > 0) {
-          repeat = Math.ceil(minContentWidth / singleSetWidth);
-        }
-        setVisionRepeat(repeat < 2 ? 2 : repeat);
-        setVisionAnimDuration(20 + repeat * 5);
-      }
-    }
-    updateRepeats();
-    window.addEventListener("resize", updateRepeats);
-    return () => window.removeEventListener("resize", updateRepeats);
-  }, []);
 
   const { displayed: typedText, isTyping, graphemeCount, displayedCount } = useTypingEffect(
     "Hey there,",
@@ -806,139 +759,18 @@ const Index = () => {
                   </div>
                 </section>
 
-                {/* Projects Section */}
+                {/* 3D Project Gallery Section */}
                 <section id="projects" className="px-6">
-                  <div className="flex items-center gap-3 mb-8">
+                  <div className="flex items-center gap-3 mb-4">
                     <Briefcase className="w-6 h-6 text-blue-600" />
                     <h2 className="text-3xl font-bold text-gray-900">Projects</h2>
                   </div>
-                  {/* Regular Projects - Dynamic Seamless Marquee */}
-                  <div className="overflow-hidden w-full mb-12" ref={projectsContainerRef}>
-                    <div
-                      className="flex w-max"
-                      ref={projectsContentRef}
-                      style={{
-                        animation: `scroll-left-dyn ${projectsAnimDuration}s linear infinite`,
-                      }}
-                    >
-                      {Array.from({ length: projectsRepeat }).flatMap((_, r) =>
-                        projects.map((project, index) => (
-                          <Card
-                            key={r + '-' + index}
-                            className="relative overflow-hidden bg-transparent backdrop-blur-xl border-gray-200/50 hover:shadow-lg transition-all duration-300 hover:scale-105 flex-shrink-0 w-80 inline-block cursor-pointer mx-1"
-                            onClick={() => { setModalProject(project); setModalOpen(true); }}
-                          >
-                            {/* Video Background */}
-                            <video
-                              className="absolute inset-0 w-full h-full object-cover z-0"
-                              src={project.video}
-                              autoPlay
-                              loop
-                              muted
-                              playsInline
-                              style={{ opacity: 0.5 }}
-                            />
-                            {/* Overlay for extra clarity */}
-                            <div className="absolute inset-0 bg-white/30 z-10" />
-                            {/* Card Content */}
-                            <div className="relative z-20 h-full flex flex-col">
-                              <CardHeader>
-                                <CardTitle className="text-lg">{project.title}</CardTitle>
-                                <CardDescription>{project.description}</CardDescription>
-                              </CardHeader>
-                              <CardContent className="flex flex-col flex-1">
-                                <div className="flex flex-wrap gap-2 mb-4">
-                                  {project.tech.map((tech) => (
-                                    <Badge key={tech} variant="secondary" className="text-xs">
-                                      {tech}
-                                    </Badge>
-                                  ))}
-                                </div>
-                                <div className="flex-1" />
-                                <div className="flex gap-2 mt-2">
-                                  <a href="https://github.com/Suyashh-s" target="_blank" rel="noopener noreferrer">
-                                    <Button size="sm" variant="outline" className="flex-1">
-                                      <Github className="w-4 h-4 mr-2" />
-                                      Code
-                                    </Button>
-                                  </a>
-                                  <Button size="sm" className="flex-1">
-                                    <ExternalLink className="w-4 h-4 mr-2" />
-                                    View
-                                  </Button>
-                                </div>
-                              </CardContent>
-                            </div>
-                          </Card>
-                        ))
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Vision Vault Subsection */}
-                  <div className="mb-8">
-                    <h3 className="text-2xl font-semibold text-gray-800 mb-6 pl-2 border-l-4 border-purple-500">Vision Vault</h3>
-                    <div className="overflow-hidden w-full" ref={visionContainerRef}>
-                      <div
-                        className="flex w-max"
-                        ref={visionContentRef}
-                        style={{
-                          animation: `scroll-right-dyn ${visionAnimDuration}s linear infinite`,
-                        }}
-                      >
-                        {Array.from({ length: visionRepeat }).flatMap((_, r) =>
-                          visionVaultProjects.map((project, index) => (
-                            <Card
-                              key={r + '-' + index}
-                              className="relative overflow-hidden bg-transparent backdrop-blur-xl border-purple-200/50 hover:shadow-lg transition-all duration-300 hover:scale-105 flex-shrink-0 w-80 inline-block cursor-pointer mx-1"
-                              onClick={() => { setModalProject(project); setModalOpen(true); }}
-                            >
-                              {/* Video Background */}
-                              <video
-                                className="absolute inset-0 w-full h-full object-cover z-0"
-                                src={project.video}
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
-                                style={{ opacity: 0.5 }}
-                              />
-                              {/* Overlay for extra clarity */}
-                              <div className="absolute inset-0 bg-white/30 z-10" />
-                              {/* Card Content */}
-                              <div className="relative z-20 h-full flex flex-col">
-                                <CardHeader>
-                                  <CardTitle className="text-lg">{project.title}</CardTitle>
-                                  <CardDescription>{project.description}</CardDescription>
-                                </CardHeader>
-                                <CardContent className="flex flex-col flex-1">
-                                  <div className="flex flex-wrap gap-2 mb-4">
-                                    {project.tech.map((tech) => (
-                                      <Badge key={tech} variant="outline" className="text-xs bg-purple-100/50">
-                                        {tech}
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                  <div className="flex-1" />
-                                  <div className="flex gap-2 mt-2">
-                                    <a href="https://github.com/Suyashh-s" target="_blank" rel="noopener noreferrer">
-                                      <Button size="sm" variant="outline" className="flex-1">
-                                        <Github className="w-4 h-4 mr-2" />
-                                        Code
-                                      </Button>
-                                    </a>
-                                    <Button size="sm" className="flex-1 bg-purple-500 text-white hover:bg-purple-600">
-                                      <ExternalLink className="w-4 h-4 mr-2" />
-                                      View
-                                    </Button>
-                                  </div>
-                                </CardContent>
-                              </div>
-                            </Card>
-                          ))
-                        )}
-                      </div>
-                    </div>
+                  <p className="text-sm text-gray-500 mb-4">Scroll inside the 3D gallery to explore — click a project to zoom in</p>
+                  <div
+                    className="w-full rounded-2xl overflow-hidden border border-gray-200/50 shadow-xl"
+                    style={{ height: "70vh" }}
+                  >
+                    <GalleryScene embedded />
                   </div>
                 </section>
 

@@ -1,6 +1,21 @@
+/* ── Google Fonts ─────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Cinematic design tokens ─────────────────────────────────────────────── */
+:root {
+  --c-bg:      #000000;
+  --c-cyan:    #00f5ff;
+  --c-purple:  #7b2fff;
+  --c-green:   #22d3a0;
+  --c-alert:   #ff003c;
+  --c-text:    #ffffff;
+  --font-mono: "Share Tech Mono", monospace;
+  --font-disp: "Orbitron", sans-serif;
+}
 
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.

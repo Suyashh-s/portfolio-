@@ -6,6 +6,7 @@ import { QdrantClient } from "@qdrant/js-client-rest";
 import OpenAI from "openai";
 import { pipeline } from "@xenova/transformers";
 import dotenv from "dotenv";
+import fs from "fs";
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ const QDRANT_API_KEY = process.env.QDRANT_API_KEY || "eyJhbGciOiJIUzI1NiIsInR5cC
 const qdrant = new QdrantClient({
   url: "https://b266344a-9319-41de-92c5-e3042ae0735c.eu-west-2-0.aws.cloud.qdrant.io:6333",
   apiKey: QDRANT_API_KEY,
+  checkCompatibility: false,
 });
 
 // ✅ OpenAI setup
@@ -29,31 +31,68 @@ const openai = new OpenAI({
   apiKey: OPENAI_API_KEY,
 });
 
+// ✅ Load local portfolio data as Qdrant fallback
+let localPortfolioText = "";
+try {
+  const raw = fs.readFileSync(new URL('./my_data.json', import.meta.url), 'utf8');
+  const entries = JSON.parse(raw);
+  localPortfolioText = entries.map(e => e.text || "").filter(Boolean).join("\n\n");
+  console.log(`✅ Loaded ${entries.length} local portfolio entries as fallback`);
+} catch (e) {
+  console.warn("⚠️  Could not load my_data.json:", e.message);
+}
+
 // ✅ Load embedding model
 let embedder;
+let embedderReady = false;
 (async () => {
-  console.log("⏳ Loading embedding model...");
-  embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
-  console.log("✅ Embedding model loaded!");
+  try {
+    console.log("⏳ Loading embedding model...");
+    embedder = await pipeline("feature-extraction", "Xenova/all-MiniLM-L6-v2");
+    embedderReady = true;
+    console.log("✅ Embedding model loaded!");
+  } catch (err) {
+    console.error("Failed to load embedding model:", err?.message || err);
+  }
 })();
+
+function debugLog(...args) {
+  const line = new Date().toISOString() + ' ' + args.map(a => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ');
+  console.log(line);
+  try { fs.appendFileSync('server-debug.log', line + '\n'); } catch (e) {}
+}
 
 // ✅ API route
 app.post("/api/chat", async (req, res) => {
   const { message } = req.body;
   if (!message) return res.status(400).json({ error: "No message provided" });
+  debugLog('[ /api/chat ] request received');
+  if (!embedderReady) {
+    return res.status(503).json({ response: "Server starting up: embedding model still loading — please try again in a few seconds.", images: [] });
+  }
 
+  if (!OPENAI_API_KEY) {
+    console.error("OpenAI API key missing when handling /api/chat request");
+    return res.status(500).json({ response: "Server misconfiguration: missing OpenAI API key.", images: [] });
+  }
+
+  let qdrantText = localPortfolioText || "I couldn't find any exact match in my data.";
+  let images = [];
+
+  // ── Qdrant vector search (best-effort — falls back to local data if unavailable) ──
   try {
+    debugLog('[ /api/chat ] computing embeddings');
     const embeddings = await embedder(message, { pooling: "mean", normalize: true });
+    debugLog('[ /api/chat ] embeddings computed');
     const vector = Array.from(embeddings.data);
 
+    debugLog('[ /api/chat ] searching qdrant');
     const results = await qdrant.search("portfolio", {
       vector,
       limit: 1,
       with_payload: true,
     });
-
-    let qdrantText = "I couldn't find any exact match in my data.";
-    let images = [];
+    debugLog('[ /api/chat ] qdrant search complete - results:', results.length);
 
     if (results.length > 0 && results[0].payload && results[0].payload.text) {
       qdrantText = results[0].payload.text;
@@ -62,7 +101,12 @@ app.post("/api/chat", async (req, res) => {
         images = results[0].payload.images || [];
       }
     }
+  } catch (qdrantErr) {
+    debugLog('[ /api/chat ] Qdrant unavailable, using local fallback:', qdrantErr.message);
+  }
 
+  try {
+    debugLog('[ /api/chat ] calling OpenAI chat completion');
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -76,29 +120,15 @@ app.post("/api/chat", async (req, res) => {
         }
       ],
     });
-
-    let geminiAnswer = completion.choices[0].message.content;
-
-    let cleanedAnswer = geminiAnswer.trim();
-    if (cleanedAnswer.startsWith("```html")) {
-      cleanedAnswer = cleanedAnswer.slice(6).trim();
-    }
-    if (cleanedAnswer.startsWith("```")) {
-      cleanedAnswer = cleanedAnswer.slice(3).trim();
-    }
-    if (cleanedAnswer.endsWith("```")) {
-      cleanedAnswer = cleanedAnswer.slice(0, -3).trim();
-    }
-
+    debugLog('[ /api/chat ] OpenAI returned completion');
+    let cleanedAnswer = completion.choices[0].message.content.trim();
+    if (cleanedAnswer.startsWith("```html")) cleanedAnswer = cleanedAnswer.slice(6).trim();
+    if (cleanedAnswer.startsWith("```"))     cleanedAnswer = cleanedAnswer.slice(3).trim();
+    if (cleanedAnswer.endsWith("```"))       cleanedAnswer = cleanedAnswer.slice(0, -3).trim();
     res.json({ response: cleanedAnswer, images });
   } catch (error) {
-    console.error("Error:", error);
-    res.status(200).json({
-      response: `The server is currently overloaded. Please try again in 5–10 seconds.
-
-Meanwhile, feel free to explore my **projects**, **skills**, or **achievements** using the buttons below.`,
-      images: [],
-    });
+    console.error("Error in /api/chat:", error?.message || error);
+    return res.status(500).json({ response: "Sorry, I'm having trouble connecting right now. Please try again in a moment.", images: [] });
   }
 });
 
@@ -106,19 +136,33 @@ Meanwhile, feel free to explore my **projects**, **skills**, or **achievements**
 app.post("/api/query", async (req, res) => {
   const { query } = req.body;
   if (!query) return res.status(400).json({ error: "No query provided" });
+  debugLog('[ /api/query ] request received');
+  if (!embedderReady) {
+    return res.status(503).json({ answer: "Server starting up: embedding model still loading — please try again in a few seconds.", images: [] });
+  }
 
+  if (!OPENAI_API_KEY) {
+    console.error("OpenAI API key missing when handling /api/query request");
+    return res.status(500).json({ answer: "Server misconfiguration: missing OpenAI API key.", images: [] });
+  }
+
+  let qdrantText = localPortfolioText || "I couldn't find any exact match in my data.";
+  let images = [];
+
+  // ── Qdrant vector search (best-effort — falls back to local data if unavailable) ──
   try {
+    debugLog('[ /api/query ] computing embeddings');
     const embeddings = await embedder(query, { pooling: "mean", normalize: true });
+    debugLog('[ /api/query ] embeddings computed');
     const vector = Array.from(embeddings.data);
 
+    debugLog('[ /api/query ] searching qdrant');
     const results = await qdrant.search("portfolio", {
       vector,
       limit: 1,
       with_payload: true,
     });
-
-    let qdrantText = "I couldn’t find any exact match in my data.";
-    let images = [];
+    debugLog('[ /api/query ] qdrant search complete - results:', results.length);
 
     if (results.length > 0 && results[0].payload && results[0].payload.text) {
       qdrantText = results[0].payload.text;
@@ -127,7 +171,12 @@ app.post("/api/query", async (req, res) => {
         images = results[0].payload.images || [];
       }
     }
+  } catch (qdrantErr) {
+    debugLog('[ /api/query ] Qdrant unavailable, using local fallback:', qdrantErr.message);
+  }
 
+  try {
+    debugLog('[ /api/query ] calling OpenAI chat completion');
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -141,29 +190,15 @@ app.post("/api/query", async (req, res) => {
         }
       ],
     });
-
-    let geminiAnswer = completion.choices[0].message.content;
-
-    let cleanedAnswer = geminiAnswer.trim();
-    if (cleanedAnswer.startsWith("```html")) {
-      cleanedAnswer = cleanedAnswer.slice(6).trim();
-    }
-    if (cleanedAnswer.startsWith("```")) {
-      cleanedAnswer = cleanedAnswer.slice(3).trim();
-    }
-    if (cleanedAnswer.endsWith("```")) {
-      cleanedAnswer = cleanedAnswer.slice(0, -3).trim();
-    }
-
+    debugLog('[ /api/query ] OpenAI returned completion');
+    let cleanedAnswer = completion.choices[0].message.content.trim();
+    if (cleanedAnswer.startsWith("```html")) cleanedAnswer = cleanedAnswer.slice(6).trim();
+    if (cleanedAnswer.startsWith("```"))     cleanedAnswer = cleanedAnswer.slice(3).trim();
+    if (cleanedAnswer.endsWith("```"))       cleanedAnswer = cleanedAnswer.slice(0, -3).trim();
     res.json({ answer: cleanedAnswer, images });
   } catch (error) {
-    console.error("Error:", error);
-    res.status(200).json({
-      answer: `The server is currently overloaded. Please try again in 5–10 seconds.
-
-Meanwhile, feel free to explore my **projects**, **skills**, or **achievements** using the buttons below.`,
-      images: [],
-    });
+    console.error("Error in /api/query:", error?.message || error);
+    return res.status(500).json({ answer: "Sorry, I'm having trouble connecting right now. Please try again in a moment.", images: [] });
   }
 });
 

@@ -80,12 +80,15 @@
   },
   {
     "id": "achievements",
-  "text": "Some of my key achievements and hackathon milestones include:\n\n🏆 Winner — Smart India Hackathon 2024 (National Level), Government of India.\n\n🥈 Finalist — InspirioBiz 5.0 Case Study Competition 2025 (National Level), VESIM (Vivekanand Education Society's Institute of Management Studies). Our team 'Shiledar' secured a finalist position as one of the first undergraduate engineering teams to break into this business-focused competition.\n\n🎯 Grand Finalist — IDE Bootcamp (Edition 2, Phase 2), 2025 (National Level), Ministry of Education & Wadhwani Foundation.\n\n💡 Top 30 — MujHacks 2.0, 2024 (University Level), Manipal University Jaipur.\n\n🤖 Finalist — LenDenClub's AI Hackathon — The Matrix Protocol, 2025.\n\n🚀 Grand Finalist — Airavat 2.0 - An AI Hackathon, 2025 (National Level), IEEE CS, Sardar Patel Institute of Technology, Mumbai.\n\n...and many more! I continue to actively participate in national and international hackathons, constantly pushing my skills, learning from amazing teams, and building solutions that make an impact.",
+  "text": "Some of my key achievements and hackathon milestones include:\n\n🏆 Winner — Smart India Hackathon 2024 (National Level), Government of India.\n\n� Winner — HackUp Hackathon — 1st Place with a prize of ₹1,00,000 (1 Lakh Rupees), plus a fully sponsored trip to Dubai and exclusive passes to GITEX GLOBAL — one of the world's largest technology events. This was an incredible milestone and an experience I'll never forget.\n\n🥈 Finalist — InspirioBiz 5.0 Case Study Competition 2025 (National Level), VESIM (Vivekanand Education Society's Institute of Management Studies). Our team 'Shiledar' secured a finalist position as one of the first undergraduate engineering teams to break into this business-focused competition.\n\n🎯 Grand Finalist — IDE Bootcamp (Edition 2, Phase 2), 2025 (National Level), Ministry of Education & Wadhwani Foundation.\n\n💡 Top 30 — MujHacks 2.0, 2024 (University Level), Manipal University Jaipur.\n\n🤖 Finalist — LenDenClub's AI Hackathon — The Matrix Protocol, 2025.\n\n🚀 Grand Finalist — Airavat 2.0 - An AI Hackathon, 2025 (National Level), IEEE CS, Sardar Patel Institute of Technology, Mumbai.\n\n...and many more! I continue to actively participate in national and international hackathons, constantly pushing my skills, learning from amazing teams, and building solutions that make an impact.",
   "images": [
     "/images/photo1.jpg",
     "/images/photo2.jpg",
     "/images/photo3.jpg",
-    "/images/photo4.jpg"
+    "/images/photo4.jpg",
+    "/images/photo5.jpg",
+    "/images/photo6.jpg",
+    "/images/photo7.jpg"
   ]
   ,"example_questions": [
     "What are your achievements?",

@@ -140,11 +140,11 @@ async function retrieveContext(query) {
   return localCtx;
 }
 
-const SYSTEM_PROMPT = "You are Suyash Sawant, and you're answering in first person but don't write 'As Suyash Sawant' unnecessarily. Write clearly, professionally, and in a structured, elegant style. Use bullet points, line breaks, and markdown formatting as needed. When necessary, bold important words (using ** **), or use headings (like ## or ###) to organize sections and emphasize key points. Avoid overly casual words or emojis. Only provide a direct answer â€” do not mention that you are an assistant or AI.";
+const SYSTEM_PROMPT = "You are Suyash Sawant answering in first person. Be concise and direct — 3 to 6 sentences or a short bullet list unless the question genuinely needs more. Use markdown: bold key terms with **bold**, use - bullet points for lists. Never add blank lines between list items. No preamble, no sign-off, no filler. Never mention being an AI or assistant.";
 
 // â”€â”€ /api/chat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 app.post("/api/chat", async (req, res) => {
-  const { message } = req.body;
+  const { message, stream: wantStream } = req.body;
   if (!message) return res.status(400).json({ error: "No message provided" });
   debugLog('[ /api/chat ] received:', message.slice(0, 80));
 
@@ -154,12 +154,43 @@ app.post("/api/chat", async (req, res) => {
 
   const { text: contextText, images } = await retrieveContext(message);
 
+  // ── Streaming mode ────────────────────────────────────────────────────────
+  if (wantStream) {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    // Send images immediately
+    res.write(`data: ${JSON.stringify({ images })}\n\n`);
+    try {
+      const stream = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        stream: true,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user",   content: `Context: "${contextText}"\n\nQuestion: "${message}"` },
+        ],
+      });
+      for await (const chunk of stream) {
+        const content = chunk.choices[0]?.delta?.content;
+        if (content) res.write(`data: ${JSON.stringify({ content })}\n\n`);
+      }
+    } catch (err) {
+      console.error("Streaming error:", err?.message);
+      res.write(`data: ${JSON.stringify({ content: "\n\nSorry, something went wrong." })}\n\n`);
+    }
+    res.write('data: [DONE]\n\n');
+    res.end();
+    debugLog('[ /api/chat ] stream done');
+    return;
+  }
+
+  // ── Non-streaming fallback ────────────────────────────────────────────────
   try {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        { role: "user",   content: `Use this context if helpful: "${contextText}". User question: "${message}"` },
+        { role: "user",   content: `Context: "${contextText}"\n\nQuestion: "${message}"` },
       ],
     });
     let answer = completion.choices[0].message.content.trim()

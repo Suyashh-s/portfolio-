@@ -197,7 +197,7 @@ const Chatbot = () => {
     e.preventDefault();
     if (!inputMessage.trim()) return;
 
-    setShowSuggestions(false); // Hide suggestions after sending
+    setShowSuggestions(false);
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -210,38 +210,57 @@ const Chatbot = () => {
     setInputMessage("");
     setIsTyping(true);
 
+    const botId = (Date.now() + 1).toString();
+
     try {
       const API_URL = import.meta.env.VITE_API_URL || "https://portfolio-d4fz.onrender.com/api/chat";
       const res = await fetch(API_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: userMessage.text }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userMessage.text, stream: true }),
       });
 
-      const data = await res.json();
+      if (!res.ok || !res.body) throw new Error("Stream unavailable");
 
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: data.response || data.answer || "Sorry, I couldn't generate a response.",
-        isUser: false,
-        timestamp: new Date(),
-        images: data.images || [],
-      };
+      // Add empty bot message — will be filled as chunks arrive
+      setMessages((prev) => [...prev, { id: botId, text: "", isUser: false, timestamp: new Date(), images: [] }]);
+      setIsTyping(false);
 
-      setMessages((prev) => [...prev, botMessage]);
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const payload = line.slice(6).trim();
+          if (payload === "[DONE]") break;
+          try {
+            const parsed = JSON.parse(payload);
+            if (parsed.images) {
+              setMessages((prev) => prev.map((m) => m.id === botId ? { ...m, images: parsed.images } : m));
+            }
+            if (parsed.content) {
+              setMessages((prev) => prev.map((m) => m.id === botId ? { ...m, text: m.text + parsed.content } : m));
+            }
+          } catch { /* ignore malformed chunks */ }
+        }
+      }
     } catch (error) {
       console.error("Error:", error);
-      const botMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        text: "Oops! Something went wrong. Please try again.",
-        isUser: false,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, botMessage]);
-    } finally {
       setIsTyping(false);
+      setMessages((prev) => {
+        // Replace empty bot message if it exists, otherwise append
+        const hasBot = prev.some((m) => m.id === botId);
+        const errMsg: Message = { id: botId, text: "Oops! Something went wrong. Please try again.", isUser: false, timestamp: new Date() };
+        return hasBot ? prev.map((m) => m.id === botId ? errMsg : m) : [...prev, errMsg];
+      });
     }
   };
 
@@ -324,9 +343,9 @@ const Chatbot = () => {
                     <p className="text-sm whitespace-pre-wrap">{message.text}</p>
                   ) : (
                     <div
-                      className="text-sm whitespace-pre-wrap"
+                      className="text-sm chat-markdown"
                       dangerouslySetInnerHTML={{
-                        __html: marked.parse(message.text),
+                        __html: marked.parse(message.text) as string,
                       }}
                     ></div>
                   )}

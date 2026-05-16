@@ -5,6 +5,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Chatbot markdown rendering — no excessive spacing ───────────────────── */
+.chat-markdown p                  { margin: 0; line-height: 1.55; }
+.chat-markdown p + p              { margin-top: 0.4rem; }
+.chat-markdown ul, 
+.chat-markdown ol                 { margin: 0.25rem 0; padding-left: 1.2rem; }
+.chat-markdown li                 { margin: 0; line-height: 1.55; }
+.chat-markdown li + li            { margin-top: 0.15rem; }
+.chat-markdown h1, 
+.chat-markdown h2, 
+.chat-markdown h3                 { margin: 0.5rem 0 0.2rem; font-weight: 600; }
+.chat-markdown strong             { font-weight: 600; }
+
 /* ── Cinematic design tokens ─────────────────────────────────────────────── */
 :root {
   --c-bg:      #000000;
